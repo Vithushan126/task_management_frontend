@@ -109,7 +109,7 @@ const navItems: NavItem[] = [
   {
     name: "Employee",
     icon: <EmployeeIcon />,
-    subItems: [{ name: "Designation ", path: "/position" },{ name: "Department", path: "/department" },{ name: "Employee", path: "/employee" }],
+    subItems: [{ name: "Designation ", path: "/designation" },{ name: "Department", path: "/department" },{ name: "Employee", path: "/employee" }],
   },
   {
     icon: <ChatIcon />,
