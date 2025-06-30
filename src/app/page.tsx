@@ -1,13 +1,13 @@
-import SignInForm from "@/components/auth/SignInForm";
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "InvicTask Sign In | InvicTask - Project & Task Management Platform",
+  title: "Sign In | InvicTask - Project & Task Management Platform",
   description:
     "Access your InvicTask account to manage projects, tasks, teams, and workflows efficiently with our all-in-one management platform.",
 };
 
 
-export default function SignIn() {
-  return <SignInForm />;
+export default function Home() {
+  redirect("/signin");
 }
