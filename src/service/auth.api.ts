@@ -11,8 +11,7 @@ export const login = async ({
 };
 
 export const logout = async () => {
-  const { data } = await api.post('auth/logout');
-  return data;
+  return await api.post('auth/logout');
 };
 
 export const forgot = async (email: string) => {

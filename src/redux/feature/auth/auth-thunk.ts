@@ -1,5 +1,6 @@
 import { AuthAPI } from '@/service';
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { logouts } from './auth-slice';
 
 interface LoginCredentials {
   email: string;
@@ -61,3 +62,14 @@ export const reSetPassword = createAsyncThunk(
     }
   },
 );
+
+export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
+  try {
+    const { data } = await AuthAPI.logout();
+    // Dispatch logout reducer to reset state
+    thunkAPI.dispatch(logouts());
+    return data;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error || 'Failed to reset password');
+  }
+});
