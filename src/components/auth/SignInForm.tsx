@@ -29,11 +29,11 @@ export default function SignInForm() {
       const res = await dispatch(login(values)).unwrap();
       console.log(res);
       toast.success(res.message || 'Login successful!');
-      // if (user?.roleId === 1) {
-      //   router.push('/organization');
-      // } else if (orgId) {
-      router.push(`/dashboard`);
-      // }
+      if (res?.user?.role === 'owner') {
+        router.push('/organization');
+      } else if (res?.user?.role === 'member') {
+        router.push(`/dashboard`);
+      }
       form.resetFields();
     } catch (err: any) {
       toast.error(err?.message || 'Login failed');

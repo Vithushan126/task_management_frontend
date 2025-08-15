@@ -2,6 +2,7 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import authReducer from '@/redux/feature/auth/auth-slice';
+import orgReducer from '@/redux/feature/organization/organization-slice';
 // import visitorReducer from "./features/visitors/visitor-slice";
 // import departmentReducer from "./features/department/department-slice";
 // import designationReducer from "./features/designation/designation-slice";
@@ -9,6 +10,7 @@ import authReducer from '@/redux/feature/auth/auth-slice';
 
 const rootReducer = combineReducers({
   auth: authReducer,
+  organization: orgReducer,
   //   visitor: visitorReducer,
   //   department: departmentReducer,
   //   designation: designationReducer,
@@ -18,7 +20,7 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: 'root',
   storage,
-  blacklist: ['visitor', 'department', 'designation', 'user'], // Specify which reducers should not be persisted
+  blacklist: ['organization', 'visitor', 'department', 'designation', 'user'], // Specify which reducers should not be persisted
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
