@@ -67,28 +67,7 @@ const OrganitationForm = forwardRef(
     }, [initialValues, form]);
 
     const handleFinish = (values: any) => {
-      console.log('values', values);
-
-      const formData = new FormData();
-
-      formData.append('organizationName', values.organizationName || '');
-      formData.append('firstName', values.firstName || '');
-      formData.append('lastName', values.lastName || '');
-      formData.append('email', values.email || '');
-      formData.append('contactNumber', values.contactNumber || '');
-      formData.append('address', values.address || '');
-      formData.append(
-        'registrationDate',
-        values.registrationDate?.toISOString() || '',
-      );
-      formData.append('roleId', '2'); // Ensure roleId is string
-
-      const fileObj = values.orgImage?.[0]?.originFileObj;
-      if (fileObj) {
-        formData.append('orgImage', fileObj);
-      }
-
-      onSubmit(formData);
+      onSubmit(values);
     };
 
     const handleClose = () => {
@@ -103,12 +82,12 @@ const OrganitationForm = forwardRef(
         className="grid grid-cols-1 lg:grid-cols-2 gap-1 "
       >
         <BaseInput
-          name="organizationName"
+          name="name"
           label="Organization Name"
           placeholder="Enter name"
           required
         />
-        <BaseInput
+        {/* <BaseInput
           name="firstName"
           label="Admin First Name"
           placeholder="Enter first name"
@@ -119,39 +98,35 @@ const OrganitationForm = forwardRef(
           label="Admin Last Name"
           placeholder="Enter last name"
           required
-        />
+        /> */}
         <BaseInput
           name="email"
-          label="Email"
+          label="Admin Email"
           placeholder="Enter email"
           type="email"
           required
         />
-        <BaseInput
+        {/* <BaseInput
           name="contactNumber"
-          label="Contact Number"
+          label="Admin Contact Number"
           placeholder="Enter number"
           required
-          type="number"
-        />
-        <BaseTextArea
+          type="tel"
+        /> */}
+        {/* <BaseTextArea
           name="address"
           label="Address"
           placeholder="Enter address"
           required
           rows={2}
+        /> */}
+        <BaseTextArea
+          name="description"
+          label="Description"
+          placeholder="Enter the description"
+          rows={2}
         />
-        <BaseDatePicker
-          name="registrationDate"
-          label="Registration Date"
-          placeholder="Select date"
-          disabledDate={(current) =>
-            current && current < dayjs().startOf('day')
-          }
-          required
-          disabled={!!initialValues}
-        />
-        <BaseUpload name="orgImage" label="Upload Photo" required />
+        <BaseUpload name="logo" label="Organization Logo" />
 
         <Form.Item className="col-span-full">
           <div className="flex justify-end space-x-2">

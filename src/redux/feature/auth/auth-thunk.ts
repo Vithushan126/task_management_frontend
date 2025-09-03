@@ -2,6 +2,12 @@ import { AuthAPI } from '@/service';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { logouts } from './auth-slice';
 
+interface RegisterCredentials {
+  email: string;
+  password: string;
+  role?: string;
+}
+
 interface LoginCredentials {
   email: string;
   password: string;
@@ -11,6 +17,33 @@ interface ResetCredentials {
   token: string;
   newPassword: string;
 }
+
+export const register = createAsyncThunk(
+  'auth/register',
+  async ({ email, password, role }: RegisterCredentials, thunkAPI) => {
+    try {
+      const { data } = await AuthAPI.register({ email, password, role });
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error || 'Failed to register');
+    }
+  },
+);
+
+// ✅ New delete thunk
+export const deleteUser = createAsyncThunk(
+  'auth/deleteUser',
+  async (id: number, thunkAPI) => {
+    try {
+      const { data } = await AuthAPI.deleteUser(id);
+      return data;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data || 'Failed to delete user',
+      );
+    }
+  },
+);
 
 export const login = createAsyncThunk(
   'auth/login',

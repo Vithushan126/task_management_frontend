@@ -1,179 +1,36 @@
 'use client';
+
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useSidebar } from '../context/SidebarContext';
-import {
-  BellIcon,
-  BoltIcon,
-  BoxCubeIcon,
-  CalenderIcon,
-  ChatIcon,
-  ChevronDownIcon,
-  DocsIcon,
-  EmployeeIcon,
-  GridIcon,
-  HandshakeIcon,
-  HorizontaLDots,
-  ListIcon,
-  OrganizationIcon,
-  PageIcon,
-  PieChartIcon,
-  PlugInIcon,
-  TableIcon,
-  TimeIcon,
-  UserCircleIcon,
-} from '../icons/index';
+import { ChevronDownIcon, HorizontaLDots } from '../icons/index';
 import { useAppDispatch, useAppSelector } from '@/hooks/use-redux';
+import {
+  memberPages,
+  NavItem,
+  othersItems,
+  ownerPages,
+} from '@/constants/pages';
 
-type NavItem = {
-  name: string;
-  icon: React.ReactNode;
-  path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
-};
+// export type NavItem = {
+//   name: string;
+//   icon: React.ReactNode;
+//   path?: string;
+//   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+// };
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
   const dispatch = useAppDispatch();
-  const { user, loading } = useAppSelector((state: any) => state.auth);
+  const { user, isAuthenticated, loading } = useAppSelector(
+    (state: any) => state.auth,
+  );
   console.log(user);
 
-  const navItems: NavItem[] = [
-    ...(user?.role === 'owner'
-      ? [
-          {
-            icon: <GridIcon />,
-            name: 'Organization',
-            path: '/organization',
-          },
-        ]
-      : [
-          {
-            icon: <GridIcon />,
-            name: 'Dashboard',
-            path: '/dashboard',
-          },
-          {
-            icon: <BoltIcon />,
-            name: 'My Tasks',
-            path: '/task',
-          },
-          {
-            icon: <CalenderIcon />,
-            name: 'Calendar',
-            path: '/calendar',
-          },
-          {
-            name: 'Time Tracking',
-            icon: <TimeIcon />,
-            path: '/time-tracking',
-          },
-          {
-            name: 'Docs',
-            icon: <DocsIcon />,
-            path: '/docs',
-          },
-          {
-            name: 'Goals',
-            icon: <GridIcon />,
-            path: '/goals',
-          },
-          {
-            name: 'Reports',
-            icon: <PageIcon />,
-            path: '/reports',
-          },
-          {
-            name: 'Notification',
-            icon: <BellIcon />,
-            path: '/notification',
-          },
-          {
-            name: 'Teams',
-            icon: <HandshakeIcon />,
-            subItems: [
-              { name: 'All Teams', path: '/teams/all' },
-              { name: 'HR Team', path: '/teams/hr' },
-              { name: 'Dev Team', path: '/teams/dev' },
-              { name: 'Sales Team', path: '/teams/sales' },
-            ],
-          },
-          {
-            name: 'Workspaces',
-            icon: <ListIcon />,
-            subItems: [
-              { name: 'All Workspaces', path: '/workspaces' },
-              { name: 'Invicta Workspace', path: '/workspaces/invicta' },
-            ],
-          },
-          {
-            name: 'Projects',
-            icon: <BoxCubeIcon />,
-            subItems: [
-              { name: 'All Projects', path: '/projects' },
-              { name: 'Create Project', path: '/projects/create' },
-              { name: 'Archived', path: '/projects/archived' },
-            ],
-          },
-          {
-            name: 'Employee',
-            icon: <EmployeeIcon />,
-            subItems: [
-              { name: 'Designation ', path: '/designation' },
-              { name: 'Department', path: '/department' },
-              { name: 'Employee', path: '/employee' },
-            ],
-          },
-          {
-            icon: <ChatIcon />,
-            name: 'Chat',
-            path: '/chat',
-          },
-          {
-            icon: <UserCircleIcon />,
-            name: 'User Profile',
-            path: '/profile',
-          },
-          {
-            name: 'Settings',
-            icon: <PlugInIcon />,
-            path: '/settings',
-          },
-        ]),
-  ];
-
-  const othersItems: NavItem[] = [
-    {
-      icon: <BoxCubeIcon />,
-      name: 'UI Elements',
-      subItems: [
-        { name: 'Alerts', path: '/alerts', pro: false },
-        { name: 'Avatar', path: '/avatars', pro: false },
-        { name: 'Badge', path: '/badge', pro: false },
-        { name: 'Buttons', path: '/buttons', pro: false },
-        { name: 'Images', path: '/images', pro: false },
-        { name: 'Videos', path: '/videos', pro: false },
-      ],
-    },
-    {
-      name: 'Forms',
-      icon: <ListIcon />,
-      subItems: [{ name: 'Form Elements', path: '/form-elements', pro: false }],
-    },
-    {
-      name: 'Tables',
-      icon: <TableIcon />,
-      subItems: [{ name: 'Basic Tables', path: '/basic-tables', pro: false }],
-    },
-    {
-      name: 'Pages',
-      icon: <PageIcon />,
-      subItems: [{ name: 'Blank Page', path: '/blank', pro: false }],
-    },
-  ];
+  const navItems = user?.role === 'owner' ? ownerPages : memberPages;
 
   const renderMenuItems = (
     navItems: NavItem[],
@@ -266,30 +123,6 @@ const AppSidebar: React.FC = () => {
                       }`}
                     >
                       {subItem.name}
-                      <span className="flex items-center gap-1 ml-auto">
-                        {subItem.new && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? 'menu-dropdown-badge-active'
-                                : 'menu-dropdown-badge-inactive'
-                            } menu-dropdown-badge `}
-                          >
-                            new
-                          </span>
-                        )}
-                        {subItem.pro && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? 'menu-dropdown-badge-active'
-                                : 'menu-dropdown-badge-inactive'
-                            } menu-dropdown-badge `}
-                          >
-                            pro
-                          </span>
-                        )}
-                      </span>
                     </Link>
                   </li>
                 ))}

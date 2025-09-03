@@ -31,7 +31,7 @@ export default function SignInForm() {
       toast.success(res.message || 'Login successful!');
       if (res?.user?.role === 'owner') {
         router.push('/organization');
-      } else if (res?.user?.role === 'member') {
+      } else if (res?.user?.role === 'admin') {
         router.push(`/dashboard`);
       }
       form.resetFields();

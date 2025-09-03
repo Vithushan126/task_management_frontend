@@ -1,5 +1,17 @@
 import api from './axios';
 
+export const register = async ({
+  email,
+  password,
+  role,
+}: {
+  email: string;
+  password: string;
+  role?: string;
+}) => {
+  return await api.post('auth/register', { email, password, role });
+};
+
 export const login = async ({
   email,
   password,
@@ -26,4 +38,8 @@ export const reSetPassword = async ({
   newPassword: string;
 }) => {
   return await api.post('auth/reset-password', { token, newPassword });
+};
+
+export const deleteUser = async (id: number) => {
+  return await api.delete(`auth/${id}`);
 };

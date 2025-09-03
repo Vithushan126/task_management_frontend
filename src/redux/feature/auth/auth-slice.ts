@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { login } from './auth-thunk';
+import { login, register } from './auth-thunk';
 
 export type User = {
   id: number;
@@ -47,6 +47,7 @@ export const authSlice = createSlice({
   },
   extraReducers(builder) {
     builder
+      //login
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;

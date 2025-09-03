@@ -1,10 +1,11 @@
-"use client";
+'use client';
 
-import { useSidebar } from "@/context/SidebarContext";
-import AppHeader from "@/layout/AppHeader";
-import AppSidebar from "@/layout/AppSidebar";
-import Backdrop from "@/layout/Backdrop";
-import React from "react";
+import ProtectedPage from '@/components/protect/ProtectedPage';
+import { useSidebar } from '@/context/SidebarContext';
+import AppHeader from '@/layout/AppHeader';
+import AppSidebar from '@/layout/AppSidebar';
+import Backdrop from '@/layout/Backdrop';
+import React from 'react';
 
 export default function AdminLayout({
   children,
@@ -15,24 +16,25 @@ export default function AdminLayout({
 
   // Dynamic class for main content margin based on sidebar state
   const mainContentMargin = isMobileOpen
-    ? "ml-0"
+    ? 'ml-0'
     : isExpanded || isHovered
-    ? "lg:ml-[290px]"
-    : "lg:ml-[90px]";
+    ? 'lg:ml-[290px]'
+    : 'lg:ml-[90px]';
 
   return (
     <div className="min-h-screen xl:flex">
-      {/* Sidebar and Backdrop */}
       <AppSidebar />
       <Backdrop />
-      {/* Main Content Area */}
       <div
-        className={`flex-1 transition-all  duration-300 ease-in-out ${mainContentMargin}`}
+        className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}
       >
-        {/* Header */}
         <AppHeader />
-        {/* Page Content */}
-        <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">{children}</div>
+
+        <div className="p-4 md:p-6 overflow-x-auto">
+          <div className="mx-auto min-w-full max-w-5xl">
+            <ProtectedPage>{children}</ProtectedPage>
+          </div>
+        </div>
       </div>
     </div>
   );

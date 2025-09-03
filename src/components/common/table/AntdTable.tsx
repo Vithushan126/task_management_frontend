@@ -20,11 +20,10 @@ const AntdTable = <T extends object>({
   className,
 }: Props<T>) => {
   return (
-
     <div
       className={classNames(
         'bg-white dark:bg-white/[0.03] rounded-2xl shadow-md p-4 overflow-x-auto border border-gray-200 dark:border-white/[0.05]',
-        className
+        className,
       )}
     >
       <Table
@@ -33,8 +32,8 @@ const AntdTable = <T extends object>({
         rowKey={rowKey}
         loading={loading}
         pagination={{ pageSize: 10 }}
-        className=' overflow-hidden rounded-xl  border border-gray-200  bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'
-        scroll={{ x: 'max-content' }} 
+        className=" overflow-hidden rounded-xl  border border-gray-200  bg-white dark:border-white/[0.05] dark:bg-white/[0.03]"
+        scroll={{ x: 'max-content' }}
       />
     </div>
   );

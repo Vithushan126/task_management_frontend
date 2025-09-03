@@ -1,7 +1,7 @@
 import api from './axios';
 
 export const createOrganizations = async (payload: FormData) => {
-  const { data } = await api.post('/auth/register', payload, {
+  const { data } = await api.post('/organizations/create', payload, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
