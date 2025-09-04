@@ -27,16 +27,24 @@ export default function SignInForm() {
     try {
       setLoading(true);
       const res = await dispatch(login(values)).unwrap();
-      console.log(res);
-      toast.success(res.message || 'Login successful!');
-      if (res?.user?.role === 'owner') {
+      console.log('Login successful:', res);
+
+      toast.success('Login successful!');
+
+      // Navigate based on user role and organization/workspace data
+      if (res?.user?.role === 'super_admin') {
         router.push('/organization');
-      } else if (res?.user?.role === 'admin') {
-        router.push(`/dashboard`);
+      } else if (res?.workspaces && res.workspaces.length > 0) {
+        router.push('/dashboard');
+      } else {
+        // Default dashboard for users without organization/workspace
+        router.push('/dashboard');
       }
+
       form.resetFields();
     } catch (err: any) {
-      toast.error(err?.message || 'Login failed');
+      console.error('Login error:', err);
+      toast.error(err || 'Login failed');
     } finally {
       setLoading(false);
     }

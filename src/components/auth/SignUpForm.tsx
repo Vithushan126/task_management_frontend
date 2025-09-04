@@ -1,14 +1,65 @@
-"use client";
-import Checkbox from "@/components/form/input/Checkbox";
-import Input from "@/components/form/input/InputField";
-import Label from "@/components/form/Label";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
-import Link from "next/link";
-import React, { useState } from "react";
+'use client';
+import Checkbox from '@/components/form/input/Checkbox';
+import Input from '@/components/form/input/InputField';
+import Label from '@/components/form/Label';
+import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from '@/icons';
+import Link from 'next/link';
+import React, { useState } from 'react';
+import { Button, Form } from 'antd';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
+import { useAppDispatch } from '@/hooks/use-redux';
+import { register } from '@/redux/feature/auth/auth-thunk';
+import type { RegisterDto } from '@/service/auth.api';
 
 export default function SignUpForm() {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+
+  const [form] = Form.useForm();
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const onFinish = async (values: any) => {
+    try {
+      setLoading(true);
+
+      const registerData: RegisterDto = {
+        email: values.email,
+        password: values.password,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        displayName:
+          values.displayName || `${values.firstName} ${values.lastName}`,
+        organizationName: values.organizationName,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        locale: 'en',
+      };
+
+      const res = await dispatch(register(registerData)).unwrap();
+      console.log('Registration successful:', res);
+
+      toast.success(
+        'Registration successful! Please check your email to verify your account.',
+      );
+
+      // Navigate based on response
+      if (res?.organization) {
+        router.push('/organization');
+      } else {
+        router.push('/dashboard');
+      }
+
+      form.resetFields();
+    } catch (err: any) {
+      console.error('Registration error:', err);
+      toast.error(err || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full overflow-y-auto no-scrollbar">
       {/* <div className="w-full max-w-md sm:pt-10 mx-auto mb-5">
@@ -131,7 +182,7 @@ export default function SignUpForm() {
                   <div className="relative">
                     <Input
                       placeholder="Enter your password"
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ? 'text' : 'password'}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -153,11 +204,11 @@ export default function SignUpForm() {
                     onChange={setIsChecked}
                   />
                   <p className="inline-block font-normal text-gray-500 dark:text-gray-400">
-                    By creating an account means you agree to the{" "}
+                    By creating an account means you agree to the{' '}
                     <span className="text-gray-800 dark:text-white/90">
                       Terms and Conditions,
-                    </span>{" "}
-                    and our{" "}
+                    </span>{' '}
+                    and our{' '}
                     <span className="text-gray-800 dark:text-white">
                       Privacy Policy
                     </span>

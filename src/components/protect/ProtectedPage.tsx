@@ -34,7 +34,7 @@ const ProtectedPage = ({ children }: { children: React.ReactNode }) => {
 
     if (!loading && isAuthenticated && user) {
       const allowedPages =
-        user.role === 'owner'
+        user.role === 'super_admin'
           ? [...ownerPages, ...othersItems]
           : [...memberPages, ...othersItems];
 

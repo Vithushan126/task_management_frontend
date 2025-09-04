@@ -101,7 +101,7 @@ export default function NewPasswordForm() {
                 name="newPassword"
                 label={
                   <Label>
-                    Conform Password <span className="text-error-500">*</span>
+                    Confirm Password <span className="text-error-500">*</span>
                   </Label>
                 }
                 dependencies={['password']}

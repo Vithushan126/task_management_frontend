@@ -1,10 +1,10 @@
-import axios from "axios";
+import axios from 'axios';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
   withCredentials: true,
   headers: {
-    Accept: "application/json",
+    Accept: 'application/json',
   },
 });
 
@@ -22,8 +22,8 @@ const processQueue = (error: any, token: string | null = null) => {
 // Request interceptor – attach access token
 api.interceptors.request.use(
   (config) => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("access_token");
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('access_token');
       console.log(token);
 
       if (token) {
@@ -32,7 +32,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 api.interceptors.response.use(
@@ -52,15 +52,45 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-          {},
-          { withCredentials: true }
+        const refreshToken = localStorage.getItem('refresh_token');
+
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/auth/refresh-token`,
+          { refreshToken },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
         );
-        processQueue(null);
+
+        const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+        // Update stored tokens
+        localStorage.setItem('access_token', accessToken);
+        localStorage.setItem('refresh_token', newRefreshToken);
+
+        // Update the authorization header for the original request
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+        processQueue(null, accessToken);
         return api(originalRequest);
       } catch (err) {
+        // Refresh failed, clear tokens and redirect to login
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+
         processQueue(err, null);
+
+        // Redirect to login page
+        if (typeof window !== 'undefined') {
+          window.location.href = '/signin';
+        }
+
         return Promise.reject(err);
       } finally {
         isRefreshing = false;
@@ -68,7 +98,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

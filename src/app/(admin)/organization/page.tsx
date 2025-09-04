@@ -83,6 +83,8 @@ export default function Organization() {
           email: values.email,
           password: '123456',
           role: 'admin',
+          firstName: 'vithu',
+          lastName: 'jathu',
         };
         const authRes = await dispatch(register(authPayload)).unwrap();
         console.log('authRes', authRes);

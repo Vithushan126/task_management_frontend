@@ -28,9 +28,8 @@ const AppSidebar: React.FC = () => {
   const { user, isAuthenticated, loading } = useAppSelector(
     (state: any) => state.auth,
   );
-  console.log(user);
 
-  const navItems = user?.role === 'owner' ? ownerPages : memberPages;
+  const navItems = user?.role === 'super_admin' ? ownerPages : memberPages;
 
   const renderMenuItems = (
     navItems: NavItem[],

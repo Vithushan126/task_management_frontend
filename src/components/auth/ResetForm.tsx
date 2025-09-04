@@ -9,21 +9,20 @@ import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from '@/icons';
 import { useAppDispatch } from '@/hooks/use-redux';
-import { forgot } from '@/redux/feature/auth/auth-thunk';
+import { forgotPassword } from '@/redux/feature/auth/auth-thunk';
 
 export default function ResetForm() {
   const dispatch = useAppDispatch();
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
- 
 
   const onFinish = async (values: any) => {
     try {
       setLoading(true);
       console.log(values);
 
-      const res = await dispatch(forgot(values)).unwrap();
+      const res = await dispatch(forgotPassword(values)).unwrap();
       console.log(res);
       toast.success(res.message || 'Login successful!');
 
