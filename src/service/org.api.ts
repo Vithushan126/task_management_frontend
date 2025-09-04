@@ -9,8 +9,8 @@ export const createOrganizations = async (payload: FormData) => {
   return data.data;
 };
 
-export const getAllOrganizations = async () => {
-  return await api.get('/organizations/all');
+export const getAllOrganizations = async (params?: Record<string, any>) => {
+  return await api.get('/organizations/admin/all', { params });
 };
 
 export const getAllOrganizationsById = async (id: number) => {

@@ -82,12 +82,12 @@ const OrganitationForm = forwardRef(
         className="grid grid-cols-1 lg:grid-cols-2 gap-1 "
       >
         <BaseInput
-          name="name"
+          name="organizationName"
           label="Organization Name"
           placeholder="Enter name"
           required
         />
-        {/* <BaseInput
+        <BaseInput
           name="firstName"
           label="Admin First Name"
           placeholder="Enter first name"
@@ -98,7 +98,7 @@ const OrganitationForm = forwardRef(
           label="Admin Last Name"
           placeholder="Enter last name"
           required
-        /> */}
+        />
         <BaseInput
           name="email"
           label="Admin Email"
@@ -106,27 +106,8 @@ const OrganitationForm = forwardRef(
           type="email"
           required
         />
-        {/* <BaseInput
-          name="contactNumber"
-          label="Admin Contact Number"
-          placeholder="Enter number"
-          required
-          type="tel"
-        /> */}
-        {/* <BaseTextArea
-          name="address"
-          label="Address"
-          placeholder="Enter address"
-          required
-          rows={2}
-        /> */}
-        <BaseTextArea
-          name="description"
-          label="Description"
-          placeholder="Enter the description"
-          rows={2}
-        />
-        <BaseUpload name="logo" label="Organization Logo" />
+
+        {/* <BaseUpload name="logo" label="Organization Logo" /> */}
 
         <Form.Item className="col-span-full">
           <div className="flex justify-end space-x-2">

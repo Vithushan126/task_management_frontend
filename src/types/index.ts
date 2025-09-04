@@ -57,17 +57,32 @@ export type Organization = {
   logo?: string;
   website?: string;
   industry?: string;
-  size?: string; // '1-10', '11-50', etc.
-  ownerId: string;
-  plan: OrganizationPlan;
-  settings?: OrganizationSettings;
-  billing?: OrganizationBilling;
+  size?: string;
+  ownerId?: string;
+  plan: string;
+  settings?: any;
   isActive: boolean;
-  deletedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
-
-  // Derived / virtual fields from backend
+  createdAt: string;
+  updatedAt: string;
   memberCount?: number;
   workspaceCount?: number;
+  owner?: any;
+};
+
+export type OrganizationState = {
+  organization: Organization[]; // the array for the table
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  loading: boolean;
+  error: string | null;
+};
+
+export type SuperAdminOrganizationListDto = {
+  organizations: Organization[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 };

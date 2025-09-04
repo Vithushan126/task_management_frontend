@@ -10,6 +10,8 @@ type Props<T> = {
   rowKey?: string;
   loading?: boolean;
   className?: string;
+  pagination?: any;
+  onChange?: (pagination: any, filters: any, sorter: any) => void;
 };
 
 const AntdTable = <T extends object>({
@@ -18,6 +20,8 @@ const AntdTable = <T extends object>({
   rowKey = 'id',
   loading,
   className,
+  pagination = 10,
+  onChange,
 }: Props<T>) => {
   return (
     <div
@@ -31,7 +35,8 @@ const AntdTable = <T extends object>({
         dataSource={data}
         rowKey={rowKey}
         loading={loading}
-        pagination={{ pageSize: 10 }}
+        pagination={pagination}
+        onChange={onChange}
         className=" overflow-hidden rounded-xl  border border-gray-200  bg-white dark:border-white/[0.05] dark:bg-white/[0.03]"
         scroll={{ x: 'max-content' }}
       />

@@ -126,41 +126,41 @@ export const authSlice = createSlice({
         } else {
           state.error = action.payload as string;
         }
-      })
-      // Register
-      .addCase(register.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(register.fulfilled, (state, action) => {
-        state.loading = false;
-        state.error = null;
-        state.user = action.payload?.user;
-        state.isAuthenticated = true;
-        state.tokens = action.payload?.tokens;
-        state.organization = action.payload?.organization;
-        state.workspaces = action.payload?.workspaces || [];
-
-        // Store tokens in localStorage
-        if (typeof window !== 'undefined' && action.payload?.tokens) {
-          localStorage.setItem(
-            'access_token',
-            action.payload.tokens.accessToken,
-          );
-          localStorage.setItem(
-            'refresh_token',
-            action.payload.tokens.refreshToken,
-          );
-        }
-      })
-      .addCase(register.rejected, (state, action) => {
-        state.loading = false;
-        if (action.payload instanceof Error) {
-          state.error = action.payload.message;
-        } else {
-          state.error = action.payload as string;
-        }
       });
+    // // Register
+    // .addCase(register.pending, (state) => {
+    //   state.loading = true;
+    //   state.error = null;
+    // })
+    // .addCase(register.fulfilled, (state, action) => {
+    //   state.loading = false;
+    //   state.error = null;
+    //   state.user = action.payload?.user;
+    //   state.isAuthenticated = true;
+    //   state.tokens = action.payload?.tokens;
+    //   state.organization = action.payload?.organization;
+    //   state.workspaces = action.payload?.workspaces || [];
+
+    //   // Store tokens in localStorage
+    //   if (typeof window !== 'undefined' && action.payload?.tokens) {
+    //     localStorage.setItem(
+    //       'access_token',
+    //       action.payload.tokens.accessToken,
+    //     );
+    //     localStorage.setItem(
+    //       'refresh_token',
+    //       action.payload.tokens.refreshToken,
+    //     );
+    //   }
+    // })
+    // .addCase(register.rejected, (state, action) => {
+    //   state.loading = false;
+    //   if (action.payload instanceof Error) {
+    //     state.error = action.payload.message;
+    //   } else {
+    //     state.error = action.payload as string;
+    //   }
+    // });
   },
 });
 

@@ -6,18 +6,27 @@ import {
   getOrganizationWithId,
   updateOrganization,
 } from './organization-thunk';
+import { Organization } from '@/types';
 
 type OrganizationState = {
-  organization: any[];
+  organization: Organization[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
   loading: boolean;
   error: string | null;
 };
 
-const initialState = {
+const initialState: OrganizationState = {
   organization: [],
+  total: 0,
+  page: 1,
+  limit: 10,
+  totalPages: 1,
   loading: false,
   error: null,
-} as OrganizationState;
+};
 
 export const organizationSlice = createSlice({
   name: 'organization',
@@ -29,20 +38,18 @@ export const organizationSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-
       .addCase(getAllOrganization.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
-        state.organization = action.payload;
+        state.organization = action.payload.organizations;
+        state.total = action.payload.total;
+        state.page = action.payload.page;
+        state.limit = action.payload.limit;
+        state.totalPages = action.payload.totalPages;
       })
-
       .addCase(getAllOrganization.rejected, (state, action) => {
         state.loading = false;
-        if (action.payload instanceof Error) {
-          state.error = action.payload.message;
-        } else {
-          state.error = action.payload as string;
-        }
+        state.error = action.payload || 'Failed to fetch organization';
       })
 
       .addCase(getOrganizationWithId.pending, (state) => {

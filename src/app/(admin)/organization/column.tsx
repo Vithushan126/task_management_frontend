@@ -27,7 +27,7 @@ export const getOrganizationColumns = (
           <Image
             width={40}
             height={40}
-            src={record?.imageUrl || '/images/user/default-user.jpg'}
+            src={record?.logo || '/images/organization/Organization.png'}
             alt={record?.name}
           />
         </div>
@@ -38,81 +38,63 @@ export const getOrganizationColumns = (
     ),
   },
   {
-    title: 'Contact Email',
+    title: 'Owner',
     width: 200,
-    // dataIndex: ['users', 0, 'email'],
-    // ...getColumnSearchProps('users'),
     render: (_, record) => {
-      if (!record || !record.users || !Array.isArray(record.users)) {
-        return (
-          <span className="text-gray-800 dark:text-white/90 text-theme-sm">
-            N/A
-          </span>
-        );
-      }
-
-      const email = record.users[0]?.email || 'N/A';
+      const owner = record?.owner;
       return (
-        <span className="text-gray-800 dark:text-white/90 text-theme-sm text-nowrap">
-          {email}
+        <div className="flex flex-row gap-2">
+          <div className="w-10 h-10 overflow-hidden rounded-full bg-gray-100">
+            <Image
+              width={40}
+              height={40}
+              src={owner?.avatar || '/images/user/User.svg'}
+              alt={owner?.firstName}
+            />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-gray-800 dark:text-white/90 text-theme-sm font-medium">
+              {owner.firstName} {owner.lastName}
+            </span>
+            <span className="text-gray-500 dark:text-white/60 text-xs">
+              {owner.email}
+            </span>
+          </div>
+        </div>
+      );
+    },
+  },
+  {
+    title: 'Contact Number',
+    width: 200,
+    dataIndex: 'owner',
+    render: (_, record) => {
+      const owner = record?.owner;
+      return (
+        <span className="text-gray-800 dark:text-white/90 text-theme-sm">
+          {owner.contactNumber}
         </span>
       );
     },
   },
-  // {
-  //   title: 'Contact Email',
-  //    dataIndex: ['users', 0, 'email'],
-  //    ...getColumnSearchProps('users'),
-  //   render: (_, record) => {
-  //     const email = record.users?.[0]?.email || '';
-  //     return (
-  //       <span className="text-gray-800 dark:text-white/90 text-theme-sm">{email}</span>
-  //     )
-  //   },
-  // },
-  {
-    title: 'Contact Number',
-    width: 150,
-    dataIndex: 'contactNumber',
-    ...getColumnSearchProps('contactNumber'),
-  },
-  {
-    title: 'Address',
-    width: 150,
-    dataIndex: 'address',
-    ...getColumnSearchProps('address'),
-  },
   {
     title: 'Registered On',
     width: 150,
-    dataIndex: 'registrationDate',
+    dataIndex: 'createdAt',
     render: (date) => new Date(date).toLocaleDateString(),
   },
   {
-    title: 'Organization Url',
-    dataIndex: 'loginUrl',
-    width: 300,
-    render: (text: string) => (
-      <div className="flex items-center justify-between gap-2">
-        <span className="truncate max-w-[200px]" title={text}>
-          {text}
-        </span>
-        <Button
-          icon={<CopyOutlined />}
-          size="small"
-          onClick={() => {
-            navigator.clipboard
-              .writeText(text)
-              .then(() => {
-                toast.success('Copied to clipboard!');
-              })
-              .catch(() => {
-                console.log('Failed to copy.');
-              });
-          }}
-        />
-      </div>
-    ),
+    title: 'Industry',
+    width: 150,
+    dataIndex: 'industry',
+  },
+  {
+    title: 'Member Count',
+    dataIndex: 'memberCount',
+  },
+  {
+    title: 'Workspace Count',
+    dataIndex: 'workspaceCount',
   },
   {
     title: 'Status',

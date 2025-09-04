@@ -19,16 +19,23 @@ import {
   createOrganization,
   getAllOrganization,
 } from '@/redux/feature/organization/organization-thunk';
-import { Organization } from '@/types';
+import type { Organization } from '@/types';
 import { deleteUser, register } from '@/redux/feature/auth/auth-thunk';
 
 export default function Organization() {
   const dispatch = useAppDispatch();
-  const { organization, loading } = useAppSelector(
+  const { organization, loading, total, page, limit } = useAppSelector(
     (state) => state.organization,
   );
+
   const { isOpen, openModal, closeModal } = useModal();
   const [editingRecord, setEditingRecord] = useState<Organization | null>(null);
+
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
+  const [sorter, setSorter] = useState<{
+    field?: string;
+    order?: 'ascend' | 'descend';
+  }>({});
 
   const { getColumnSearchProps } = useColumnSearch<Organization>();
 
@@ -78,30 +85,24 @@ export default function Organization() {
       let authRes: any = null;
 
       try {
-        // Step 1: Create auth user
         const authPayload = {
           email: values.email,
-          password: '123456',
-          role: 'admin',
-          firstName: 'vithu',
-          lastName: 'jathu',
+          password: 'admin@123',
+          role: 'ADMIN' as const,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          organizationName: values.organizationName,
         };
         const authRes = await dispatch(register(authPayload)).unwrap();
-        console.log('authRes', authRes);
 
-        const formData = new FormData();
-        formData.append('name', values.name || '');
-        formData.append('description', values.description || '');
-        formData.append('ownerId', authRes.user?.id); // ✅ attach auth userId
-
-        // Handle file upload (orgImage)
-        const fileObj = values.logo?.[0]?.originFileObj;
-        if (fileObj) {
-          formData.append('logo', fileObj);
-        }
-
-        // Step 3: Dispatch with formData
-        await dispatch(createOrganization(formData)).unwrap();
+        await dispatch(
+          getAllOrganization({
+            page: pagination.current,
+            limit: pagination.pageSize,
+            sortBy: sorter.field ?? 'createdAt',
+            sortOrder: sorter.order === 'ascend' ? 'ASC' : 'DESC',
+          }),
+        );
 
         toast.success('Organization created successfully!');
         closeModal();
@@ -123,17 +124,34 @@ export default function Organization() {
   };
 
   useEffect(() => {
-    dispatch(getAllOrganization());
-  }, [dispatch]);
+    dispatch(
+      getAllOrganization({
+        page: pagination.current,
+        limit: pagination.pageSize,
+        sortBy: sorter.field ?? 'createdAt',
+        sortOrder: sorter.order === 'ascend' ? 'ASC' : 'DESC',
+      }),
+    );
+  }, [dispatch, pagination, sorter]);
+
+  const handleTableChange = (pagination: any, filters: any, sorter: any) => {
+    setPagination({
+      current: pagination.current,
+      pageSize: pagination.pageSize,
+    });
+    setSorter({ field: sorter.field, order: sorter.order });
+  };
 
   return (
     <div className="space-y-4 w-full">
       <PageBreadcrumb pageTitle="Organization Management" />
       <SearchableTable
+        rowKey="id"
         columns={columns}
-        data={organization}
+        data={organization || []}
         loading={loading}
         searchableField="name"
+        width={800}
         createButtonText="Create Organization"
         modalTitle={
           editingRecord ? 'Update the Organization' : 'Create the Organization'
@@ -158,7 +176,12 @@ export default function Organization() {
           closeModal();
           setEditingRecord(null);
         }}
-        // width={900}
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total,
+        }}
+        onChange={handleTableChange}
       />
     </div>
   );

@@ -20,6 +20,8 @@ type Props<T> = {
   closeModal?: () => void;
   width?: number | string;
   loading?: boolean;
+  pagination?: any;
+  onChange?: (pagination: any, filters: any, sorter: any) => void;
 };
 
 const SearchableTable = <T extends object>({
@@ -35,6 +37,8 @@ const SearchableTable = <T extends object>({
   openModal,
   closeModal,
   width = 600,
+  pagination,
+  onChange,
 }: Props<T>) => {
   const [search, setSearch] = useState('');
 
@@ -66,6 +70,8 @@ const SearchableTable = <T extends object>({
         data={filteredData}
         rowKey={rowKey}
         loading={loading}
+        pagination={pagination}
+        onChange={onChange}
       />
 
       <BaseModal
