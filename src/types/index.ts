@@ -86,3 +86,32 @@ export type SuperAdminOrganizationListDto = {
   limit: number;
   totalPages: number;
 };
+
+export type Members = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  contactNumber: string;
+  hireDate: string;
+  terminationDate: string;
+  imageUrl: string;
+  department: string;
+  designation: string;
+  employmentType: string;
+  gender: string;
+  address: string;
+  status: string;
+  joinedAt: string;
+
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    avatar: string | null;
+    displayName: string;
+  };
+};

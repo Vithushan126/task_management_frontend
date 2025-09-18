@@ -53,7 +53,7 @@ export const getOrganizationColumns = (
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-gray-800 dark:text-white/90 text-theme-sm font-medium">
+            <span className="text-gray-800 dark:text-white/90 text-theme-sm font-medium text-nowrap">
               {owner.firstName} {owner.lastName}
             </span>
             <span className="text-gray-500 dark:text-white/60 text-xs">

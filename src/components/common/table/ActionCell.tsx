@@ -7,9 +7,15 @@ type Props = {
   onEdit: () => void;
   onDelete?: () => void;
   showDelete?: boolean;
+  deleteDisabled?: boolean;
 };
 
-export default function ActionCell({ onEdit, onDelete,showDelete = true }: Props) {
+export default function ActionCell({
+  onEdit,
+  onDelete,
+  showDelete = true,
+  deleteDisabled = false,
+}: Props) {
   return (
     <Space>
       <Button
@@ -24,11 +30,13 @@ export default function ActionCell({ onEdit, onDelete,showDelete = true }: Props
           onConfirm={onDelete}
           okText="Yes"
           cancelText="No"
+          disabled={deleteDisabled}
         >
           <Button
             danger
             icon={<DeleteOutlined />}
             size="small"
+            disabled={deleteDisabled}
           />
         </Popconfirm>
       )}

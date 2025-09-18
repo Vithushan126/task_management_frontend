@@ -1,11 +1,11 @@
-"use client";
-import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
-import NotificationDropdown from "@/components/header/NotificationDropdown";
-import UserDropdown from "@/components/header/UserDropdown";
-import { useSidebar } from "@/context/SidebarContext";
-import Image from "next/image";
-import Link from "next/link";
-import React, { useState ,useEffect,useRef} from "react";
+'use client';
+import { ThemeToggleButton } from '@/components/common/ThemeToggleButton';
+import NotificationDropdown from '@/components/header/NotificationDropdown';
+import UserDropdown from '@/components/header/UserDropdown';
+import { useSidebar } from '@/context/SidebarContext';
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useState, useEffect, useRef } from 'react';
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -27,21 +27,21 @@ const AppHeader: React.FC = () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
         event.preventDefault();
         inputRef.current?.focus();
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
   return (
-    <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
+    <header className="sticky top-0 flex w-full bg-white border-gray-200 z-999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
           <button
@@ -98,7 +98,7 @@ const AppHeader: React.FC = () => {
               src="./images/logo/logo-dark.svg"
               alt="Logo"
             /> */}
-             {/* <svg width="100.79999999999995" height="25.35629441399166" viewBox="0 0 350 89.89735903840513"  className="text-black dark:text-white" fill="currentColor" >
+            {/* <svg width="100.79999999999995" height="25.35629441399166" viewBox="0 0 350 89.89735903840513"  className="text-black dark:text-white" fill="currentColor" >
                 <defs id="SvgjsDefs1446"></defs>
                 <g id="SvgjsG1447" transform="matrix(4.427017164592548,0,0,4.427017164592548,-6.90614599570685,-23.374660001738953)">
                   <path d="M1.56 20 l0 -13.66 q0.62 -0.12 1.6 -0.12 t1.62 0.12 l0 13.66 q-0.64 0.12 -1.62 0.12 t-1.6 -0.12 z M16.14 13.4 l0 4.1 q0 1.32 0.48 1.98 q-0.76 0.68 -1.82 0.68 q-1.04 0 -1.42 -0.48 t-0.38 -1.46 l0 -4.26 q0 -0.68 -0.18 -1 t-0.7 -0.32 q-0.3 0 -0.68 0.16 t-0.78 0.52 l0 6.68 q-0.34 0.06 -0.74 0.09 t-0.82 0.03 t-0.82 -0.03 t-0.74 -0.09 l0 -9.98 l0.14 -0.14 l1.18 0 q1.22 0 1.64 1.2 q1.4 -1.24 2.78 -1.24 q1.4 0 2.13 0.97 t0.73 2.59 z M22.080000000000002 17.62 l1.74 -7.58 q0.56 -0.12 1.26 -0.12 q0.86 0 1.5 0.24 l0.1 0.14 q-2.04 7.44 -2.78 9.7 q-1.02 0.12 -2.15 0.12 t-1.61 -0.31 t-0.74 -1.19 l-2.4 -8.36 q0.98 -0.42 1.74 -0.42 t1.18 0.33 t0.62 1.13 l0.9 3.74 q0.1 0.38 0.44 2.42 q0.02 0.16 0.2 0.16 z M31.720000000000002 12.32 l0 7.68 q-0.34 0.06 -0.74 0.09 t-0.82 0.03 t-0.83 -0.03 t-0.75 -0.09 l0 -6.62 q0 -1.16 -0.94 -1.16 l-0.3 0 q-0.12 -0.38 -0.12 -1.06 q0 -0.66 0.12 -1.12 q0.52 -0.04 0.96 -0.07 t0.8 -0.03 l0.44 0 q1.02 0 1.6 0.64 t0.58 1.74 z M28.220000000000002 6 q0.58 -0.32 1.5 -0.32 q0.94 0 1.46 0.32 q0.24 0.54 0.24 1.16 t-0.24 1.16 q-0.58 0.3 -1.52 0.3 t-1.44 -0.3 q-0.24 -0.54 -0.24 -1.16 t0.24 -1.16 z M39.06 14.440000000000001 l0 -0.26 q0 -1.12 -0.24 -1.63 t-0.9 -0.51 q-0.7 0 -0.98 0.69 t-0.28 2.29 q0 0.8 0.11 1.34 t0.32 0.87 t0.53 0.48 t0.76 0.15 q0.46 0 1.02 -0.2 t1.2 -0.64 q0.18 0.1 0.37 0.29 t0.35 0.43 t0.28 0.51 t0.18 0.51 q-0.66 0.7 -1.72 1.12 t-2.16 0.42 q-2.14 0 -3.28 -1.4 t-1.14 -3.98 q0 -1.32 0.37 -2.3 t0.98 -1.62 t1.4 -0.96 t1.65 -0.32 q0.88 0 1.61 0.24 t1.26 0.68 t0.82 1.05 t0.29 1.35 q0 0.84 -0.49 1.18 t-1.21 0.34 q-0.6 0 -1.1 -0.12 z M49.080000000000005 8.98 l0.02 1.48 l0 9.54 q-0.68 0.12 -1.62 0.12 t-1.58 -0.12 l0 -11.02 l-1.28 0.02 l-2.06 0 q-0.12 -0.58 -0.12 -1.33 t0.12 -1.33 l9.9 0 q0.16 0.52 0.16 1.26 t-0.4 1.07 t-1.28 0.33 l-0.58 0 l-1.26 -0.02 l-0.02 0 z M60.86000000000001 18.56 q-0.1 0.42 -0.38 0.9 t-0.58 0.7 q-1.4 -0.04 -2.16 -1.06 q-1.3 1.2 -2.82 1.2 q-0.78 0 -1.36 -0.25 t-0.98 -0.67 t-0.6 -0.97 t-0.2 -1.15 q0 -0.86 0.31 -1.51 t0.85 -1.08 t1.26 -0.65 t1.54 -0.22 q0.46 0 0.81 0.01 t0.61 0.03 l0 -0.38 q0 -1.26 -1.3 -1.26 q-0.84 0 -2.94 0.64 q-0.6 -0.7 -0.76 -2.18 q0.48 -0.18 1.07 -0.34 t1.21 -0.28 t1.22 -0.19 t1.08 -0.07 q0.7 0 1.35 0.2 t1.14 0.61 t0.78 1.06 t0.29 1.55 l0 4.06 q0 0.92 0.56 1.3 z M54.82000000000001 17.06 q0 0.94 1.08 0.94 q0.56 0 1.26 -0.58 l0 -1.6 q-0.4 -0.02 -0.67 -0.03 t-0.41 -0.01 q-1.26 0 -1.26 1.28 z M61.84 19.32 q0.02 -0.52 0.27 -1.14 t0.59 -0.98 q1.6 0.84 2.78 0.84 q0.56 0 0.86 -0.19 t0.3 -0.51 q0 -0.6 -0.92 -0.9 l-1.1 -0.42 q-2.5 -0.92 -2.5 -3 q0 -1.52 1.05 -2.41 t2.83 -0.89 q0.88 0 1.94 0.25 t1.74 0.59 q0.04 0.56 -0.22 1.23 t-0.64 0.95 q-1.68 -0.76 -2.8 -0.76 q-0.4 0 -0.61 0.18 t-0.21 0.46 q0 0.48 0.76 0.76 l1.24 0.44 q2.66 0.94 2.66 3.22 q0 1.5 -1.1 2.38 t-3.14 0.88 t-3.78 -0.98 z M79.16000000000001 16.02 l0.5 1.46 q0.4 1.32 0.96 1.7 q-0.88 0.98 -2.1 0.98 q-0.66 0 -1 -0.31 t-0.6 -1.09 l-0.6 -1.72 q-0.2 -0.62 -0.46 -0.83 t-0.7 -0.21 t-0.62 0.02 l0 3.98 q-0.66 0.12 -1.52 0.12 t-1.52 -0.12 l0 -14.58 l0.14 -0.14 l1.2 0 q0.94 0 1.32 0.42 t0.38 1.46 l0 6.28 l0.32 0 q0.36 0 0.56 -0.36 l1.04 -2 q0.56 -1.14 1.76 -1.14 q0.58 0 1.74 0.04 l0.12 0.16 l-1.54 2.98 q-0.4 0.76 -1.02 1.18 q1.2 0.44 1.64 1.72 z"></path>
@@ -166,7 +166,7 @@ const AppHeader: React.FC = () => {
         </div>
         <div
           className={`${
-            isApplicationMenuOpen ? "flex" : "hidden"
+            isApplicationMenuOpen ? 'flex' : 'hidden'
           } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
@@ -174,12 +174,11 @@ const AppHeader: React.FC = () => {
             <ThemeToggleButton />
             {/* <!-- Dark Mode Toggler --> */}
 
-           <NotificationDropdown /> 
+            <NotificationDropdown />
             {/* <!-- Notification Menu Area --> */}
           </div>
           {/* <!-- User Area --> */}
-          <UserDropdown /> 
-    
+          <UserDropdown />
         </div>
       </div>
     </header>

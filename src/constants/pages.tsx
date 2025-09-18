@@ -44,6 +44,7 @@ export const memberPages: NavItem[] = [
   { icon: <TimeIcon />, name: 'Time Tracking', path: '/time-tracking' },
   { icon: <DocsIcon />, name: 'Docs', path: '/docs' },
   { icon: <GridIcon />, name: 'Goals', path: '/goals' },
+  { icon: <EmployeeIcon />, name: 'Members', path: '/members' },
   { icon: <PageIcon />, name: 'Reports', path: '/reports' },
   { icon: <BellIcon />, name: 'Notification', path: '/notification' },
   {
