@@ -65,6 +65,7 @@ export const memberPages: NavItem[] = [
       { name: 'Invicta Workspace', path: '/workspaces/invicta' },
     ],
   },
+  { icon: <PieChartIcon />, name: 'Spaces', path: '/spaces' },
   {
     icon: <BoxCubeIcon />,
     name: 'Projects',
