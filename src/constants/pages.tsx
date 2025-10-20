@@ -66,15 +66,7 @@ export const memberPages: NavItem[] = [
     ],
   },
   { icon: <PieChartIcon />, name: 'Spaces', path: '/spaces' },
-  {
-    icon: <BoxCubeIcon />,
-    name: 'Projects',
-    subItems: [
-      { name: 'All Projects', path: '/projects' },
-      { name: 'Create Project', path: '/projects/create' },
-      { name: 'Archived', path: '/projects/archived' },
-    ],
-  },
+  { icon: <BoxCubeIcon />, name: 'Projects', path: '/projects' },
   {
     icon: <EmployeeIcon />,
     name: 'Employee',
