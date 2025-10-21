@@ -34,4 +34,5 @@ export type CreateWorkspaceDto = {
   description?: string;
   visibility: 'private' | 'internal' | 'public';
   organizationId: string;
+  userId?: string;
 };

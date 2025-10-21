@@ -2,7 +2,10 @@ import api from './axios';
 import { CreateWorkspaceDto } from '@/types/workspace';
 
 export const createWorkspace = async (payload: CreateWorkspaceDto) => {
-  const { data } = await api.post('/workspaces', payload);
+  const { data } = await api.post(
+    `/workspaces?organizationId=${payload?.organizationId}`,
+    payload,
+  );
   return data.data;
 };
 

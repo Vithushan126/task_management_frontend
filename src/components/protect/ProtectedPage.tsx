@@ -4,14 +4,10 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppSelector } from '@/hooks/use-redux';
 import Spinner from '@/components/ui/spinner/Spinner';
-import {
-  ownerPages,
-  memberPages,
-  NavItem,
-  othersItems,
-} from '@/constants/pages';
+import { ownerPages, useMemberPages, NavItem } from '@/constants/pages';
 
 const ProtectedPage = ({ children }: { children: React.ReactNode }) => {
+  const memberPages = useMemberPages();
   const router = useRouter();
   const pathname = usePathname();
   const { isAuthenticated, loading, user } = useAppSelector(
@@ -34,9 +30,7 @@ const ProtectedPage = ({ children }: { children: React.ReactNode }) => {
 
     if (!loading && isAuthenticated && user) {
       const allowedPages =
-        user.role === 'super_admin'
-          ? [...ownerPages, ...othersItems]
-          : [...memberPages, ...othersItems];
+        user.role === 'super_admin' ? ownerPages : memberPages;
 
       if (!isPathAllowed(allowedPages, pathname)) {
         router.push('/unauthorized'); // Page not allowed

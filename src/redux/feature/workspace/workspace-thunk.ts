@@ -4,7 +4,14 @@ import { CreateWorkspaceDto, Workspace } from '@/types/workspace';
 
 export const getAllWorkspaces = createAsyncThunk<
   any,
-  { organizationId: any; page?: number; limit?: number } | undefined,
+  | {
+      organizationId: any;
+      page?: number;
+      limit?: number;
+      sortField?: string;
+      direction?: 'ASC' | 'DESC';
+    }
+  | undefined,
   { rejectValue: string }
 >('workspace/getAll', async (params, thunkAPI) => {
   try {
@@ -21,6 +28,8 @@ export const createWorkspace = createAsyncThunk(
   'workspace/create',
   async (payload: CreateWorkspaceDto, thunkAPI) => {
     try {
+      console.log('payload', payload);
+
       return await WorkspaceAPI.createWorkspace(payload);
     } catch (error) {
       return thunkAPI.rejectWithValue(
