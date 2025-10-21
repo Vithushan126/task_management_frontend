@@ -211,5 +211,6 @@ export const useMemberPages = (): NavItem[] => {
     { icon: <ChatIcon />, name: 'Chat', path: '/chat' },
     { icon: <UserCircleIcon />, name: 'User Profile', path: '/profile' },
     { icon: <PlugInIcon />, name: 'Settings', path: '/settings' },
+    { icon: <PlugInIcon />, name: 'Projects', path: '/projects' },
   ];
 };
