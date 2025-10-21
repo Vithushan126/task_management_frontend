@@ -67,6 +67,7 @@ export type Organization = {
   memberCount?: number;
   workspaceCount?: number;
   owner?: any;
+  status?: any;
 };
 
 export type OrganizationState = {

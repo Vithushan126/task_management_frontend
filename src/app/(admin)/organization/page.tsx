@@ -7,12 +7,6 @@ import { getOrganizationColumns } from './column';
 import OrganitationForm from './OrganitationForm';
 import { useAppDispatch, useAppSelector } from '@/hooks/use-redux';
 import toast from 'react-hot-toast';
-// import {
-//   createOrganization,
-//   deleteOrganizationById,
-//   getAllOrganization,
-//   updateOrganization,
-// } from '@/redux/features/organization/organization-thunk';
 import SearchableTable from '@/components/common/table/SearchableTable';
 import useColumnSearch from '@/components/common/table/useColumnSearch';
 import {
