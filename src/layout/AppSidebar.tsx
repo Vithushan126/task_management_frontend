@@ -20,7 +20,7 @@ import {
 
 const AppSidebar: React.FC = () => {
   const dispatch = useAppDispatch();
-    const { user, organization, isAuthenticated, loading } = useAppSelector(
+  const { user, organization, isAuthenticated, loading } = useAppSelector(
     (state: any) => state.auth,
   );
   useEffect(() => {
@@ -32,7 +32,6 @@ const AppSidebar: React.FC = () => {
   const memberPages = useMemberPages();
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
-
 
   const navItems = user?.role === 'super_admin' ? ownerPages : memberPages;
 
