@@ -34,10 +34,16 @@ const AppSidebar: React.FC = () => {
   const pathname = usePathname();
 
   const navItems = user?.role === 'super_admin' ? ownerPages : memberPages;
+  console.log('navItems', navItems);
 
   const [expandedWorkspaces, setExpandedWorkspaces] = useState<
     Record<string, boolean>
   >({});
+  console.log('expandedWorkspaces', expandedWorkspaces);
+
+  const [expandedSpaces, setExpandedSpaces] = useState<Record<string, boolean>>(
+    {},
+  );
   const [expandedProjects, setExpandedProjects] = useState<
     Record<string, boolean>
   >({});
@@ -50,6 +56,7 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const workspaceFormRef = useRef<any>(null); // ref to reset form
+
   const {
     isOpen: isWorkspaceModalOpen,
     openModal: openWorkspaceModal,
@@ -65,15 +72,33 @@ const AppSidebar: React.FC = () => {
     [pathname],
   );
 
+  // ✅ Toggle workspace — only one expanded at a time
   const toggleWorkspace = (workspaceId: string) => {
-    setExpandedWorkspaces((prev) => ({
+    console.log('workspaceId', workspaceId);
+
+    setExpandedWorkspaces((prev) => {
+      const newState: Record<string, boolean> = {};
+      // collapse all, expand only the clicked one
+      Object.keys(prev).forEach((id) => (newState[id] = false));
+      newState[workspaceId] = !prev[workspaceId];
+      return newState;
+    });
+  };
+
+  // ✅ Toggle space — only within that workspace
+  const toggleSpace = (spaceId: string) => {
+    setExpandedSpaces((prev) => ({
       ...prev,
-      [workspaceId]: !prev[workspaceId],
+      [spaceId]: !prev[spaceId],
     }));
   };
 
+  // ✅ Toggle project — only within that space
   const toggleProject = (projectId: string) => {
-    setExpandedProjects((prev) => ({ ...prev, [projectId]: !prev[projectId] }));
+    setExpandedProjects((prev) => ({
+      ...prev,
+      [projectId]: !prev[projectId],
+    }));
   };
 
   const handleSubmenuToggle = (index: number, menuType: 'main' | 'others') => {
@@ -87,10 +112,6 @@ const AppSidebar: React.FC = () => {
       }
       return { type: menuType, index };
     });
-  };
-
-  const handleAddWorkspace = () => {
-    openWorkspaceModal();
   };
 
   const handleCloseWorkspaceModal = () => {
@@ -163,16 +184,21 @@ const AppSidebar: React.FC = () => {
     }
   }, [openSubmenu]);
 
-  const renderWorkspaceItem = (nav: NavItem, index: number) => {
-    const isWorkspaceExpanded = expandedWorkspaces[nav.name];
+  const renderWorkspaceItem = (workspace: any, index: number) => {
+    console.log('workspace', workspace);
+
+    const isWorkspaceExpanded = expandedWorkspaces[workspace.id];
+    console.log('isWorkspaceExpanded', isWorkspaceExpanded);
+
     const showContent = isExpanded || isHovered || isMobileOpen;
 
     return (
-      <li key={nav.name}>
+      <li key={workspace.id}>
+        {/* Workspace Header */}
         <div
-          onClick={() => toggleWorkspace(nav.name)}
+          onClick={() => toggleWorkspace(workspace.id)}
           className={`menu-item group ${
-            isActive(nav.path) ? 'menu-item-active' : 'menu-item-inactive'
+            isActive(workspace.slug) ? 'menu-item-active' : 'menu-item-inactive'
           } ${!showContent ? 'lg:justify-center' : 'lg:justify-start'}`}
         >
           {showContent ? (
@@ -183,27 +209,29 @@ const AppSidebar: React.FC = () => {
             )
           ) : null}
 
-          {nav.color && showContent && (
+          {workspace.color && showContent && (
             <div
               className="w-3 h-3 rounded shrink-0"
-              style={{ backgroundColor: nav.color }}
+              style={{ backgroundColor: workspace.color }}
             />
           )}
 
           {!showContent && (
             <span
               className={`${
-                isActive(nav.path)
+                isActive(workspace.slug)
                   ? 'menu-item-icon-active'
                   : 'menu-item-icon-inactive'
               }`}
             >
-              {nav.icon}
+              {workspace.icon}
             </span>
           )}
 
           {showContent && (
-            <span className="menu-item-text flex-1 text-left">{nav.name}</span>
+            <span className="menu-item-text flex-1 text-left">
+              {workspace.name}
+            </span>
           )}
 
           {showContent && (
@@ -211,7 +239,7 @@ const AppSidebar: React.FC = () => {
               className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
               onClick={(e) => {
                 e.stopPropagation();
-                // Handle add project action
+                // Add workspace action
               }}
             >
               <PlusIcon className="w-3 h-3" />
@@ -219,25 +247,25 @@ const AppSidebar: React.FC = () => {
           )}
         </div>
 
-        {/* Projects List */}
-        {isWorkspaceExpanded && showContent && nav.projects && (
+        {/* Spaces List */}
+        {isWorkspaceExpanded && showContent && workspace.spaces && (
           <div className="ml-6 mt-1 space-y-0.5">
-            {nav.projects.map((project) => {
-              const isProjectExpanded = expandedProjects[project.id];
+            {workspace.spaces.map((space: any) => {
+              console.log('space', space);
 
+              const isSpaceExpanded = expandedSpaces[space.id];
               return (
-                <div key={project.id}>
+                <div key={space.id}>
+                  {/* Space Header */}
                   <button
-                    onClick={() => {
-                      toggleProject(project.id);
-                    }}
+                    onClick={() => toggleSpace(space.id)}
                     className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-sm group ${
-                      isActive(project.path)
+                      isActive(space.slug)
                         ? 'bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                     }`}
                   >
-                    {isProjectExpanded ? (
+                    {isSpaceExpanded ? (
                       <ChevronDown className="w-3 h-3 shrink-0" />
                     ) : (
                       <ChevronRight className="w-3 h-3 shrink-0" />
@@ -245,38 +273,77 @@ const AppSidebar: React.FC = () => {
 
                     <Hash
                       className="w-3 h-3 shrink-0"
-                      style={{ color: project.color }}
+                      style={{ color: space.color }}
                     />
 
                     <span className="flex-1 text-left truncate">
-                      {project.name}
+                      {space.name}
                     </span>
-
-                    {project.taskCount !== undefined &&
-                      project.taskCount > 0 && (
-                        <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
-                          {project.taskCount}
-                        </span>
-                      )}
                   </button>
 
-                  {/* Project Views */}
-                  {isProjectExpanded && project.views && (
+                  {/* Projects inside Space */}
+                  {isSpaceExpanded && space.projects && (
                     <div className="ml-5 mt-1 space-y-0.5">
-                      {project.views.map((view) => (
-                        <Link
-                          key={view.id}
-                          href={view.path}
-                          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs ${
-                            isActive(view.path)
-                              ? 'bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400'
-                              : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                          }`}
-                        >
-                          <span className="shrink-0">{view.icon}</span>
-                          <span>{view.name}</span>
-                        </Link>
-                      ))}
+                      {space.projects.map((project: any) => {
+                        const isProjectExpanded = expandedProjects[project.id];
+
+                        return (
+                          <div key={project.id}>
+                            <button
+                              onClick={() => toggleProject(project.id)}
+                              className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-sm group ${
+                                isActive(project.slug)
+                                  ? 'bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400'
+                                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                              }`}
+                            >
+                              {isProjectExpanded ? (
+                                <ChevronDown className="w-3 h-3 shrink-0" />
+                              ) : (
+                                <ChevronRight className="w-3 h-3 shrink-0" />
+                              )}
+
+                              <Hash
+                                className="w-3 h-3 shrink-0"
+                                style={{ color: project.color }}
+                              />
+
+                              <span className="flex-1 text-left truncate">
+                                {project.name}
+                              </span>
+
+                              {project.taskCount !== undefined &&
+                                project.taskCount > 0 && (
+                                  <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
+                                    {project.taskCount}
+                                  </span>
+                                )}
+                            </button>
+
+                            {/* Project Views */}
+                            {isProjectExpanded && project.views && (
+                              <div className="ml-5 mt-1 space-y-0.5">
+                                {project.views.map((view: any) => (
+                                  <Link
+                                    key={view.id}
+                                    href={view.path}
+                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs ${
+                                      isActive(view.path)
+                                        ? 'bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400'
+                                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                                    }`}
+                                  >
+                                    <span className="shrink-0">
+                                      {view.icon}
+                                    </span>
+                                    <span>{view.name}</span>
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -405,6 +472,8 @@ const AppSidebar: React.FC = () => {
     const regularItems = navItems.filter((item) => !item.isWorkspace);
     const workspaceItems = navItems.filter((item) => item.isWorkspace);
 
+    console.log('workspaceItems', workspaceItems);
+
     return (
       <>
         <ul className="flex flex-col gap-1">
@@ -424,7 +493,6 @@ const AppSidebar: React.FC = () => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    // handleAddWorkspace();
                     openWorkspaceModal();
                   }}
                   className="p-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded flex items-center justify-center"

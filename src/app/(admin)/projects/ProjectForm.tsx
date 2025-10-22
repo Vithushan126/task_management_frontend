@@ -122,7 +122,7 @@ const ProjectForm = forwardRef(
           label="Space"
           placeholder="Select a space"
           options={spaceOptions}
-          value={selectedSpace}
+          // value={selectedSpace}
           onChange={setSelectedSpace}
           required
         />

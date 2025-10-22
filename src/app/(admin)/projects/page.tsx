@@ -32,21 +32,23 @@ export default function Projects() {
   const [selectedWorkspace, setSelectedWorkspace] = useState<string>('');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
-  
+
   const { isOpen, openModal, closeModal } = useModal();
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [membersModalOpen, setMembersModalOpen] = useState(false);
-  
+
   const { getColumnSearchProps } = useColumnSearch<Project>();
 
   // Load workspaces on component mount
   useEffect(() => {
     if (organization?.id) {
-      dispatch(getAllWorkspaces({ 
-        organizationId: organization.id,
-        page: 1,
-        limit: 100 
-      }));
+      dispatch(
+        getAllWorkspaces({
+          organizationId: organization.id,
+          page: 1,
+          limit: 100,
+        }),
+      );
     }
   }, [dispatch, organization?.id]);
 
@@ -92,14 +94,15 @@ export default function Projects() {
   };
 
   const columns = useMemo(
-    () => getProjectColumns(
-      getColumnSearchProps, 
-      handleEdit, 
-      handleDelete, 
-      handleViewDetails,
-      handleManageMembers
-    ),
-    [getColumnSearchProps]
+    () =>
+      getProjectColumns(
+        getColumnSearchProps,
+        handleEdit,
+        handleDelete,
+        handleViewDetails,
+        handleManageMembers,
+      ),
+    [getColumnSearchProps],
   );
 
   const handleCreateOrUpdate = async (values: any) => {
@@ -121,9 +124,7 @@ export default function Projects() {
       formRef.current?.resetForm();
       setEditingRecord(null);
     } catch (error) {
-      toast.error(
-        `Failed to ${editingRecord ? 'update' : 'create'} project.`,
-      );
+      toast.error(`Failed to ${editingRecord ? 'update' : 'create'} project.`);
     }
   };
 
@@ -132,7 +133,7 @@ export default function Projects() {
     setPagination({ current: 1, pageSize: 10 });
   };
 
-  const workspaceOptions = workspaces.map(workspace => ({
+  const workspaceOptions = workspaces.map((workspace) => ({
     label: workspace.name,
     value: workspace.id,
   }));
@@ -190,7 +191,7 @@ export default function Projects() {
             current: pagination.current,
             pageSize: pagination.pageSize,
             total,
-            onChange: (page:any, pageSize:any) => {
+            onChange: (page: any, pageSize: any) => {
               setPagination({ current: page, pageSize: pageSize || 10 });
             },
           }}

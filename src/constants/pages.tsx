@@ -41,15 +41,29 @@ export interface Project {
   views?: ProjectView[];
 }
 
+// export interface NavItem {
+//   icon?: React.ReactNode;
+//   name: string;
+//   path?: string;
+//   color?: string;
+//   badge?: number;
+//   subItems?: NavItem[];
+//   projects?: Project[];
+//   isWorkspace?: boolean;
+// }
+
 export interface NavItem {
   icon?: React.ReactNode;
   name: string;
+  slug?: any;
   path?: string;
   color?: string;
-  badge?: number;
-  subItems?: NavItem[];
-  projects?: Project[];
   isWorkspace?: boolean;
+  spaces?: NavItem[];
+  projects?: NavItem[];
+  subItems?: { name: string; path: string }[];
+  views?: NavItem[];
+  badge?: number;
 }
 
 // Owner pages
@@ -66,7 +80,6 @@ export const useMemberPages = (): NavItem[] => {
   // const { workspaces } = useAppSelector((state: any) => state.workspace);
   const { user, organization } = useAppSelector((state) => state.auth);
 
-
   useEffect(() => {
     if (organization?.id) {
       dispatch(
@@ -75,7 +88,7 @@ export const useMemberPages = (): NavItem[] => {
         }),
       );
     }
-  }, [dispatch, organization?.id, ]);
+  }, [dispatch, organization?.id]);
 
   const workspaces = [
     {
@@ -83,20 +96,50 @@ export const useMemberPages = (): NavItem[] => {
       name: 'Product Development',
       slug: 'product-development',
       color: '#7B68EE',
-      projects: [
+      spaces: [
         {
-          id: 'p1',
-          name: 'Website Redesign',
-          slug: 'website-redesign',
-          color: '#4ECDC4',
-          taskCount: 12,
+          id: 'sp-1',
+          name: 'Frontend Engineering',
+          slug: 'frontend-engineering',
+          color: '#6A5ACD',
+          projects: [
+            {
+              id: 'p1',
+              name: 'Website Redesign',
+              slug: 'website-redesign',
+              color: '#4ECDC4',
+              taskCount: 12,
+            },
+            {
+              id: 'p2',
+              name: 'Landing Page Optimization',
+              slug: 'landing-page-optimization',
+              color: '#FF6B6B',
+              taskCount: 8,
+            },
+          ],
         },
         {
-          id: 'p2',
-          name: 'Mobile App',
-          slug: 'mobile-app',
-          color: '#FF6B6B',
-          taskCount: 8,
+          id: 'sp-2',
+          name: 'Backend Engineering',
+          slug: 'backend-engineering',
+          color: '#20B2AA',
+          projects: [
+            {
+              id: 'p3',
+              name: 'API Refactor',
+              slug: 'api-refactor',
+              color: '#FFD700',
+              taskCount: 5,
+            },
+            {
+              id: 'p4',
+              name: 'Database Migration',
+              slug: 'database-migration',
+              color: '#9370DB',
+              taskCount: 3,
+            },
+          ],
         },
       ],
     },
@@ -105,13 +148,36 @@ export const useMemberPages = (): NavItem[] => {
       name: 'Marketing Team',
       slug: 'marketing-team',
       color: '#FF8C00',
-      projects: [
+      spaces: [
         {
-          id: 'p3',
-          name: 'Ad Campaign',
-          slug: 'ad-campaign',
-          color: '#FFD93D',
-          taskCount: 5,
+          id: 'sp-3',
+          name: 'Digital Campaigns',
+          slug: 'digital-campaigns',
+          color: '#FFA500',
+          projects: [
+            {
+              id: 'p5',
+              name: 'Ad Campaign Q4',
+              slug: 'ad-campaign-q4',
+              color: '#FFD93D',
+              taskCount: 7,
+            },
+          ],
+        },
+        {
+          id: 'sp-4',
+          name: 'Content Strategy',
+          slug: 'content-strategy',
+          color: '#FFB347',
+          projects: [
+            {
+              id: 'p6',
+              name: 'SEO Improvement',
+              slug: 'seo-improvement',
+              color: '#4DB6AC',
+              taskCount: 4,
+            },
+          ],
         },
       ],
     },
@@ -119,46 +185,55 @@ export const useMemberPages = (): NavItem[] => {
 
   const workspaceNavItems: NavItem[] = Array.isArray(workspaces)
     ? workspaces.map((ws: any) => ({
+        id: ws.id,
         icon: <ListIcon />,
         name: ws.name,
         path: `/workspaces/${ws.slug}`,
         color: ws.color || '#7B68EE',
         isWorkspace: true,
-        projects:
-          ws.projects?.map((project: any) => ({
-            id: project.id || project.slug,
-            name: project.name,
-            slug: project.slug,
-            path: `/workspaces/${ws.slug}/projects/${project.slug}`,
-            color: project.color || '#4ECDC4',
-            taskCount: project.taskCount || 0,
-            icon: <BoxCubeIcon />,
-            views: [
-              {
-                id: 'list',
-                name: 'List',
-                icon: <TableIcon />,
-                path: `/workspaces/${ws.slug}/projects/${project.slug}/list`,
-              },
-              {
-                id: 'board',
-                name: 'Board',
-                icon: <GridIcon />,
-                path: `/workspaces/${ws.slug}/projects/${project.slug}/board`,
-              },
-              {
-                id: 'calendar',
-                name: 'Calendar',
-                icon: <CalenderIcon />,
-                path: `/workspaces/${ws.slug}/projects/${project.slug}/calendar`,
-              },
-              {
-                id: 'timeline',
-                name: 'Timeline',
-                icon: <TimeIcon />,
-                path: `/workspaces/${ws.slug}/projects/${project.slug}/timeline`,
-              },
-            ],
+        spaces:
+          ws.spaces?.map((space: any) => ({
+            id: space.id,
+            icon: <GridIcon />,
+            name: space.name,
+            path: `/workspaces/${ws.slug}/spaces/${space.slug}`,
+            color: space.color,
+            projects:
+              space.projects?.map((project: any) => ({
+                icon: <BoxCubeIcon />,
+                id: project.id || project.slug,
+                name: project.name,
+                slug: project.slug,
+                path: `/workspaces/${ws.slug}/projects/${project.slug}`,
+                color: project.color || '#4ECDC4',
+                taskCount: project.taskCount || 0,
+                views: [
+                  {
+                    id: 'list',
+                    name: 'List',
+                    icon: <TableIcon />,
+                    path: `/workspaces/${ws.slug}/projects/${project.slug}/list`,
+                  },
+                  {
+                    id: 'board',
+                    name: 'Board',
+                    icon: <GridIcon />,
+                    path: `/workspaces/${ws.slug}/projects/${project.slug}/board`,
+                  },
+                  {
+                    id: 'calendar',
+                    name: 'Calendar',
+                    icon: <CalenderIcon />,
+                    path: `/workspaces/${ws.slug}/projects/${project.slug}/calendar`,
+                  },
+                  {
+                    id: 'timeline',
+                    name: 'Timeline',
+                    icon: <TimeIcon />,
+                    path: `/workspaces/${ws.slug}/projects/${project.slug}/timeline`,
+                  },
+                ],
+              })) || [],
           })) || [],
       }))
     : [];
@@ -211,6 +286,8 @@ export const useMemberPages = (): NavItem[] => {
     { icon: <ChatIcon />, name: 'Chat', path: '/chat' },
     { icon: <UserCircleIcon />, name: 'User Profile', path: '/profile' },
     { icon: <PlugInIcon />, name: 'Settings', path: '/settings' },
+    { icon: <PlugInIcon />, name: 'Workspaces', path: '/workspaces' },
+    { icon: <PlugInIcon />, name: 'Spaces', path: '/spaces' },
     { icon: <PlugInIcon />, name: 'Projects', path: '/projects' },
   ];
 };

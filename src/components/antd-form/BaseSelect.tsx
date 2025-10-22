@@ -12,7 +12,7 @@ interface BaseSelectProps {
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
-  onChange?: (value:  number) => void;
+  onChange?: (value: any) => void;
 }
 
 const BaseSelect = ({
@@ -22,20 +22,18 @@ const BaseSelect = ({
   placeholder = '',
   required = false,
   disabled = false,
-  onChange
+  onChange,
 }: BaseSelectProps) => {
   return (
     <Form.Item
       name={name}
       label={label}
       rules={
-        required
-          ? [{ required: true, message: `Please select ${label}` }]
-          : []
+        required ? [{ required: true, message: `Please select ${label}` }] : []
       }
     >
-      <Select placeholder={placeholder}  onChange={onChange}   disabled={disabled} >
-        {options.map(opt => (
+      <Select placeholder={placeholder} onChange={onChange} disabled={disabled}>
+        {options.map((opt) => (
           <Select.Option key={opt.value} value={opt.value}>
             {opt.label}
           </Select.Option>
