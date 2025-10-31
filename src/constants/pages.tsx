@@ -20,7 +20,10 @@ import {
   TimeIcon,
   UserCircleIcon,
 } from '@/icons/index'; // adjust imports
-import { getAllWorkspaces } from '@/redux/feature/workspace/workspace-thunk';
+import {
+  getAllNested,
+  getAllWorkspaces,
+} from '@/redux/feature/workspace/workspace-thunk';
 import { useEffect } from 'react';
 
 export interface ProjectView {
@@ -40,17 +43,6 @@ export interface Project {
   icon?: React.ReactNode;
   views?: ProjectView[];
 }
-
-// export interface NavItem {
-//   icon?: React.ReactNode;
-//   name: string;
-//   path?: string;
-//   color?: string;
-//   badge?: number;
-//   subItems?: NavItem[];
-//   projects?: Project[];
-//   isWorkspace?: boolean;
-// }
 
 export interface NavItem {
   icon?: React.ReactNode;
@@ -77,114 +69,17 @@ export const ownerPages: NavItem[] = [
 
 export const useMemberPages = (): NavItem[] => {
   const dispatch = useAppDispatch();
-  // const { workspaces } = useAppSelector((state: any) => state.workspace);
-  const { user, organization } = useAppSelector((state) => state.auth);
+  const { nested } = useAppSelector((state: any) => state.workspace);
+  const { organization } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if (organization?.id) {
-      dispatch(
-        getAllWorkspaces({
-          organizationId: organization.id,
-        }),
-      );
+      dispatch(getAllNested());
     }
   }, [dispatch, organization?.id]);
 
-  const workspaces = [
-    {
-      id: 'ws-1',
-      name: 'Product Development',
-      slug: 'product-development',
-      color: '#7B68EE',
-      spaces: [
-        {
-          id: 'sp-1',
-          name: 'Frontend Engineering',
-          slug: 'frontend-engineering',
-          color: '#6A5ACD',
-          projects: [
-            {
-              id: 'p1',
-              name: 'Website Redesign',
-              slug: 'website-redesign',
-              color: '#4ECDC4',
-              taskCount: 12,
-            },
-            {
-              id: 'p2',
-              name: 'Landing Page Optimization',
-              slug: 'landing-page-optimization',
-              color: '#FF6B6B',
-              taskCount: 8,
-            },
-          ],
-        },
-        {
-          id: 'sp-2',
-          name: 'Backend Engineering',
-          slug: 'backend-engineering',
-          color: '#20B2AA',
-          projects: [
-            {
-              id: 'p3',
-              name: 'API Refactor',
-              slug: 'api-refactor',
-              color: '#FFD700',
-              taskCount: 5,
-            },
-            {
-              id: 'p4',
-              name: 'Database Migration',
-              slug: 'database-migration',
-              color: '#9370DB',
-              taskCount: 3,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'ws-2',
-      name: 'Marketing Team',
-      slug: 'marketing-team',
-      color: '#FF8C00',
-      spaces: [
-        {
-          id: 'sp-3',
-          name: 'Digital Campaigns',
-          slug: 'digital-campaigns',
-          color: '#FFA500',
-          projects: [
-            {
-              id: 'p5',
-              name: 'Ad Campaign Q4',
-              slug: 'ad-campaign-q4',
-              color: '#FFD93D',
-              taskCount: 7,
-            },
-          ],
-        },
-        {
-          id: 'sp-4',
-          name: 'Content Strategy',
-          slug: 'content-strategy',
-          color: '#FFB347',
-          projects: [
-            {
-              id: 'p6',
-              name: 'SEO Improvement',
-              slug: 'seo-improvement',
-              color: '#4DB6AC',
-              taskCount: 4,
-            },
-          ],
-        },
-      ],
-    },
-  ];
-
-  const workspaceNavItems: NavItem[] = Array.isArray(workspaces)
-    ? workspaces.map((ws: any) => ({
+  const workspaceNavItems: NavItem[] = Array.isArray(nested)
+    ? nested.map((ws: any) => ({
         id: ws.id,
         icon: <ListIcon />,
         name: ws.name,
@@ -212,7 +107,7 @@ export const useMemberPages = (): NavItem[] => {
                     id: 'list',
                     name: 'List',
                     icon: <TableIcon />,
-                    path: `/workspaces/${ws.slug}/projects/${project.slug}/list`,
+                    path: `/${ws?.id}/${space?.id}/${project.id}/list`,
                   },
                   {
                     id: 'board',
@@ -236,7 +131,7 @@ export const useMemberPages = (): NavItem[] => {
               })) || [],
           })) || [],
       }))
-    : [];
+    : [nested];
 
   return [
     { icon: <GridIcon />, name: 'Dashboard', path: '/dashboard' },
@@ -286,8 +181,8 @@ export const useMemberPages = (): NavItem[] => {
     { icon: <ChatIcon />, name: 'Chat', path: '/chat' },
     { icon: <UserCircleIcon />, name: 'User Profile', path: '/profile' },
     { icon: <PlugInIcon />, name: 'Settings', path: '/settings' },
-    { icon: <PlugInIcon />, name: 'Workspaces', path: '/workspaces' },
-    { icon: <PlugInIcon />, name: 'Spaces', path: '/spaces' },
+    // { icon: <PlugInIcon />, name: 'Workspaces', path: '/workspaces' },
+    // { icon: <PlugInIcon />, name: 'Spaces', path: '/spaces' },
     { icon: <PlugInIcon />, name: 'Projects', path: '/projects' },
   ];
 };

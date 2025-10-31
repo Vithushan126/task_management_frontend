@@ -82,7 +82,7 @@ export default function Organization() {
         const authPayload = {
           email: values.email,
           password: 'admin@123',
-          role: 'ADMIN' as const,
+          role: 'admin' as const,
           firstName: values.firstName,
           lastName: values.lastName,
           organizationName: values.organizationName,

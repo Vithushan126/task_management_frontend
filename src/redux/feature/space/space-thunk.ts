@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import * as SpaceAPI from '@/service/space.api';
 import { CreateSpaceDto, GetSpacesParams } from '@/types/space';
+import { getAllNested } from '../workspace/workspace-thunk';
 
 export const getAllSpaces = createAsyncThunk<
   any,
@@ -12,7 +13,7 @@ export const getAllSpaces = createAsyncThunk<
     return response.data;
   } catch (error) {
     return thunkAPI.rejectWithValue(
-      error instanceof Error ? error.message : 'Failed to fetch spaces'
+      error instanceof Error ? error.message : 'Failed to fetch spaces',
     );
   }
 });
@@ -24,36 +25,41 @@ export const getSpaceById = createAsyncThunk(
       return await SpaceAPI.getSpaceById(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to fetch space'
+        error instanceof Error ? error.message : 'Failed to fetch space',
       );
     }
-  }
+  },
 );
 
 export const createSpace = createAsyncThunk(
   'space/create',
   async (payload: CreateSpaceDto, thunkAPI) => {
     try {
-      return await SpaceAPI.createSpace(payload);
+      const response = await SpaceAPI.createSpace(payload);
+      thunkAPI.dispatch(getAllNested());
+      return response;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to create space'
+        error instanceof Error ? error.message : 'Failed to create space',
       );
     }
-  }
+  },
 );
 
 export const updateSpace = createAsyncThunk(
   'space/update',
-  async ({ id, payload }: { id: string; payload: Partial<CreateSpaceDto> }, thunkAPI) => {
+  async (
+    { id, payload }: { id: string; payload: Partial<CreateSpaceDto> },
+    thunkAPI,
+  ) => {
     try {
       return await SpaceAPI.updateSpace(id, payload);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to update space'
+        error instanceof Error ? error.message : 'Failed to update space',
       );
     }
-  }
+  },
 );
 
 export const deleteSpace = createAsyncThunk(
@@ -63,10 +69,10 @@ export const deleteSpace = createAsyncThunk(
       return await SpaceAPI.deleteSpace(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to delete space'
+        error instanceof Error ? error.message : 'Failed to delete space',
       );
     }
-  }
+  },
 );
 
 export const archiveSpace = createAsyncThunk(
@@ -76,10 +82,10 @@ export const archiveSpace = createAsyncThunk(
       return await SpaceAPI.archiveSpace(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to archive space'
+        error instanceof Error ? error.message : 'Failed to archive space',
       );
     }
-  }
+  },
 );
 
 export const unarchiveSpace = createAsyncThunk(
@@ -89,8 +95,8 @@ export const unarchiveSpace = createAsyncThunk(
       return await SpaceAPI.unarchiveSpace(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to unarchive space'
+        error instanceof Error ? error.message : 'Failed to unarchive space',
       );
     }
-  }
+  },
 );

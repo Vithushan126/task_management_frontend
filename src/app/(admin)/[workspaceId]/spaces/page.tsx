@@ -20,8 +20,11 @@ import { getAllWorkspaces } from '@/redux/feature/workspace/workspace-thunk';
 import type { Space } from '@/types/space';
 import { getSpaceColumns } from './columns';
 import SpaceForm from './SpaceForm';
+import { useParams } from 'next/navigation';
 
 export default function Spaces() {
+  const params = useParams();
+  const workspaceId = params.workspaceId;
   const dispatch = useAppDispatch();
   const formRef = useRef<any>(null);
   const { organization } = useAppSelector((state) => state.auth);
@@ -29,7 +32,7 @@ export default function Spaces() {
   const { workspaces } = useAppSelector((state) => state.workspace);
 
   const [editingRecord, setEditingRecord] = useState<Space | null>(null);
-  const [selectedWorkspace, setSelectedWorkspace] = useState<string>('');
+  const [selectedWorkspace, setSelectedWorkspace] = useState<any>(workspaceId);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
   const { isOpen, openModal, closeModal } = useModal();
   const { getColumnSearchProps } = useColumnSearch<Space>();
@@ -37,11 +40,13 @@ export default function Spaces() {
   // Load workspaces on component mount
   useEffect(() => {
     if (organization?.id) {
-      dispatch(getAllWorkspaces({ 
-        organizationId: organization.id,
-        page: 1,
-        limit: 100 
-      }));
+      dispatch(
+        getAllWorkspaces({
+          organizationId: organization.id,
+          page: 1,
+          limit: 100,
+        }),
+      );
     }
   }, [dispatch, organization?.id]);
 
@@ -55,11 +60,13 @@ export default function Spaces() {
   // Load spaces when workspace is selected
   useEffect(() => {
     if (selectedWorkspace) {
-      dispatch(getAllSpaces({
-        workspaceId: selectedWorkspace,
-        page: pagination.current,
-        limit: pagination.pageSize,
-      }));
+      dispatch(
+        getAllSpaces({
+          workspaceId: selectedWorkspace,
+          page: pagination.current,
+          limit: pagination.pageSize,
+        }),
+      );
     }
   }, [dispatch, selectedWorkspace, pagination]);
 
@@ -73,11 +80,13 @@ export default function Spaces() {
       await dispatch(deleteSpace(id)).unwrap();
       toast.success('Space deleted successfully!');
       if (selectedWorkspace) {
-        dispatch(getAllSpaces({
-          workspaceId: selectedWorkspace,
-          page: pagination.current,
-          limit: pagination.pageSize,
-        }));
+        dispatch(
+          getAllSpaces({
+            workspaceId: selectedWorkspace,
+            page: pagination.current,
+            limit: pagination.pageSize,
+          }),
+        );
       }
     } catch (error) {
       toast.error('Failed to delete space.');
@@ -86,7 +95,7 @@ export default function Spaces() {
 
   const handleArchive = async (id: string) => {
     try {
-      const space = spaces.find(s => s.id === id);
+      const space = spaces.find((s) => s.id === id);
       if (space?.isArchived) {
         await dispatch(unarchiveSpace(id)).unwrap();
         toast.success('Space unarchived successfully!');
@@ -94,13 +103,15 @@ export default function Spaces() {
         await dispatch(archiveSpace(id)).unwrap();
         toast.success('Space archived successfully!');
       }
-      
+
       if (selectedWorkspace) {
-        dispatch(getAllSpaces({
-          workspaceId: selectedWorkspace,
-          page: pagination.current,
-          limit: pagination.pageSize,
-        }));
+        dispatch(
+          getAllSpaces({
+            workspaceId: selectedWorkspace,
+            page: pagination.current,
+            limit: pagination.pageSize,
+          }),
+        );
       }
     } catch (error) {
       toast.error('Failed to archive/unarchive space.');
@@ -108,8 +119,14 @@ export default function Spaces() {
   };
 
   const columns = useMemo(
-    () => getSpaceColumns(getColumnSearchProps, handleEdit, handleDelete, handleArchive),
-    [getColumnSearchProps]
+    () =>
+      getSpaceColumns(
+        getColumnSearchProps,
+        handleEdit,
+        handleDelete,
+        handleArchive,
+      ),
+    [getColumnSearchProps],
   );
 
   const handleCreateOrUpdate = async (values: any) => {
@@ -125,19 +142,19 @@ export default function Spaces() {
       }
 
       if (selectedWorkspace) {
-        dispatch(getAllSpaces({
-          workspaceId: selectedWorkspace,
-          page: pagination.current,
-          limit: pagination.pageSize,
-        }));
+        dispatch(
+          getAllSpaces({
+            workspaceId: selectedWorkspace,
+            page: pagination.current,
+            limit: pagination.pageSize,
+          }),
+        );
       }
       closeModal();
       formRef.current?.resetForm();
       setEditingRecord(null);
     } catch (error) {
-      toast.error(
-        `Failed to ${editingRecord ? 'update' : 'create'} space.`,
-      );
+      toast.error(`Failed to ${editingRecord ? 'update' : 'create'} space.`);
     }
   };
 
@@ -146,7 +163,7 @@ export default function Spaces() {
     setPagination({ current: 1, pageSize: 10 });
   };
 
-  const workspaceOptions = workspaces.map(workspace => ({
+  const workspaceOptions = workspaces.map((workspace) => ({
     label: workspace.name,
     value: workspace.id,
   }));
@@ -154,12 +171,9 @@ export default function Spaces() {
   return (
     <div className="space-y-4">
       <PageBreadcrumb pageTitle="Space Management" />
-
+      {/* 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Workspace:
-          </span>
           <Select
             placeholder="Select workspace"
             value={selectedWorkspace}
@@ -169,7 +183,7 @@ export default function Spaces() {
             loading={!workspaces.length}
           />
         </div>
-      </div>
+      </div> */}
 
       {selectedWorkspace && (
         <SearchableTable

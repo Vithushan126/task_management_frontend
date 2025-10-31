@@ -10,7 +10,7 @@ export interface RegisterDto {
   organizationName?: string;
   timezone?: string;
   locale?: string;
-  role?: 'USER' | 'ADMIN';
+  role?: 'USER' | 'admin';
 }
 
 export interface LoginDto {

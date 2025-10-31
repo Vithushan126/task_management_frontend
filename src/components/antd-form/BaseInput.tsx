@@ -2,11 +2,11 @@ import { Form, Input } from 'antd';
 
 interface BaseInputProps {
   name: string;
-  label: string;
+  label?: string;
   placeholder?: string;
   required?: boolean;
   rules?: any[];
-  type?: string; 
+  type?: string;
 }
 
 const BaseInput = ({
@@ -15,14 +15,16 @@ const BaseInput = ({
   placeholder = '',
   required = false,
   rules = [],
-  type = 'text', 
+  type = 'text',
 }: BaseInputProps) => {
   return (
     <Form.Item
       name={name}
       label={label}
       rules={[
-        ...(required ? [{ required: true, message: `Please enter ${label}` }] : []),
+        ...(required
+          ? [{ required: true, message: `Please enter ${label}` }]
+          : []),
         ...rules,
       ]}
     >

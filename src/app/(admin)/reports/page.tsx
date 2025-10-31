@@ -1,11 +1,10 @@
-import React from 'react'
+import React from 'react';
+import PageBreadcrumb from '@/components/common/PageBreadCrumb';
 
-export default function Reports () {
+export default function Reports() {
   return (
     <div>
-      Reports
+      <PageBreadcrumb pageTitle="Reports" />
     </div>
-  )
+  );
 }
-
-

@@ -23,20 +23,20 @@ const ProtectedPage = ({ children }: { children: React.ReactNode }) => {
     return false;
   };
 
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push('/signin');
-    }
+  // useEffect(() => {
+  //   if (!loading && !isAuthenticated) {
+  //     router.push('/signin');
+  //   }
 
-    if (!loading && isAuthenticated && user) {
-      const allowedPages =
-        user.role === 'super_admin' ? ownerPages : memberPages;
+  //   if (!loading && isAuthenticated && user) {
+  //     const allowedPages =
+  //       user.role === 'super_admin' ? ownerPages : memberPages;
 
-      if (!isPathAllowed(allowedPages, pathname)) {
-        router.push('/unauthorized'); // Page not allowed
-      }
-    }
-  }, [loading, isAuthenticated, user, pathname, router]);
+  //     if (!isPathAllowed(allowedPages, pathname)) {
+  //       router.push('/unauthorized'); // Page not allowed
+  //     }
+  //   }
+  // }, [loading, isAuthenticated, user, pathname, router]);
 
   if (loading) {
     return <Spinner />;

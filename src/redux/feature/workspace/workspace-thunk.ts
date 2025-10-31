@@ -24,13 +24,29 @@ export const getAllWorkspaces = createAsyncThunk<
   }
 });
 
+export const getAllNested = createAsyncThunk(
+  'workspace/nested',
+  async (_, thunkAPI) => {
+    try {
+      const response = await WorkspaceAPI.getAllNested();
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to fetch workspaces',
+      );
+    }
+  },
+);
+
 export const createWorkspace = createAsyncThunk(
   'workspace/create',
   async (payload: CreateWorkspaceDto, thunkAPI) => {
     try {
       console.log('payload', payload);
 
-      return await WorkspaceAPI.createWorkspace(payload);
+      const response = await WorkspaceAPI.createWorkspace(payload);
+      thunkAPI.dispatch(getAllNested());
+      return response;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error instanceof Error ? error.message : 'Failed to create workspace',

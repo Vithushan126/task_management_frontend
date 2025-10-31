@@ -21,6 +21,7 @@ export type Workspace = {
 
 export type WorkspaceState = {
   workspaces: Workspace[];
+  nested?: any[];
   total: number;
   page: number;
   limit: number;

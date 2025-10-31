@@ -1,11 +1,13 @@
-import React from 'react'
+'use client';
 
-export default function Task () {
+import PageBreadcrumb from '@/components/common/PageBreadCrumb';
+import AutoSaveTable from './AutoSaveTable';
+
+export default function Task() {
   return (
-    <div>
-      Task
+    <div className="space-y-4 scroll-y-none">
+      <PageBreadcrumb pageTitle="Tasks Management" />
+      <AutoSaveTable />
     </div>
-  )
+  );
 }
-
-

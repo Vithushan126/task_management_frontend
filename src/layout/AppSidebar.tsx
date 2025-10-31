@@ -10,16 +10,21 @@ import { useSidebar } from '../context/SidebarContext';
 import { ChevronDownIcon, HorizontaLDots, PlusIcon } from '../icons/index';
 import { useAppDispatch, useAppSelector } from '@/hooks/use-redux';
 import { useMemberPages, NavItem, ownerPages } from '@/constants/pages';
-import { Modal } from 'antd';
+import { Modal, Tooltip } from 'antd';
 import WorkspaceForm from '@/app/(admin)/workspaces/WorkspaceForm';
 import { useModal } from '@/hooks/useModal';
 import {
   createWorkspace,
   getAllWorkspaces,
 } from '@/redux/feature/workspace/workspace-thunk';
+import SpaceForm from '@/app/(admin)/[workspaceId]/spaces/SpaceForm';
+import { createSpace } from '@/redux/feature/space/space-thunk';
+import ProjectForm from '@/app/(admin)/[workspaceId]/[spaceId]/projects/ProjectForm';
+import { createProject } from '@/redux/feature/project/project-thunk';
 
 const AppSidebar: React.FC = () => {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const { user, organization, isAuthenticated, loading } = useAppSelector(
     (state: any) => state.auth,
   );
@@ -34,12 +39,10 @@ const AppSidebar: React.FC = () => {
   const pathname = usePathname();
 
   const navItems = user?.role === 'super_admin' ? ownerPages : memberPages;
-  console.log('navItems', navItems);
 
   const [expandedWorkspaces, setExpandedWorkspaces] = useState<
     Record<string, boolean>
   >({});
-  console.log('expandedWorkspaces', expandedWorkspaces);
 
   const [expandedSpaces, setExpandedSpaces] = useState<Record<string, boolean>>(
     {},
@@ -56,11 +59,25 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const workspaceFormRef = useRef<any>(null); // ref to reset form
+  const spaceFormRef = useRef<any>(null); // ref to reset form
+  const projectFormRef = useRef<any>(null); // ref to reset form
+  const [workspaceId, setWorkspaceId] = useState('');
+  const [spaceId, setSpaceId] = useState('');
 
   const {
     isOpen: isWorkspaceModalOpen,
     openModal: openWorkspaceModal,
     closeModal: closeWorkspaceModal,
+  } = useModal(false);
+  const {
+    isOpen: isSpaceModalOpen,
+    openModal: openSpaceModal,
+    closeModal: closeSpaceModal,
+  } = useModal(false);
+  const {
+    isOpen: isProjectModalOpen,
+    openModal: openProjectModal,
+    closeModal: closeProjectModal,
   } = useModal(false);
 
   // const isActive = (path: string) => path === pathname;
@@ -119,9 +136,20 @@ const AppSidebar: React.FC = () => {
     workspaceFormRef.current?.resetForm?.();
   };
 
+  const handleCloseSpaceModal = () => {
+    closeSpaceModal();
+    spaceFormRef.current?.resetForm?.();
+    setWorkspaceId('');
+  };
+
+  const handleCloseProjectModal = () => {
+    closeProjectModal();
+    projectFormRef.current?.resetForm?.();
+    setSpaceId('');
+  };
+
   const handleWorkspaceSubmit = async (values: any) => {
     try {
-      console.log('New Workspace Payload:', values);
       await dispatch(
         createWorkspace({
           ...values,
@@ -140,6 +168,32 @@ const AppSidebar: React.FC = () => {
       console.error('Workspace creation failed:', error);
       toast.error(
         error?.message || 'Failed to create workspace. Please try again.',
+      );
+    }
+  };
+
+  const handleSpaceSubmit = async (values: any) => {
+    try {
+      await dispatch(createSpace(values)).unwrap();
+      toast.success('Space created successfully!');
+      handleCloseSpaceModal();
+    } catch (error: any) {
+      console.error('Space creation failed:', error);
+      toast.error(
+        error?.message || 'Failed to create Space. Please try again.',
+      );
+    }
+  };
+
+  const handleProjectSubmit = async (values: any) => {
+    try {
+      await dispatch(createProject(values)).unwrap();
+      toast.success('Project created successfully!');
+      handleCloseProjectModal();
+    } catch (error: any) {
+      console.error('Project creation failed:', error);
+      toast.error(
+        error?.message || 'Failed to create Project. Please try again.',
       );
     }
   };
@@ -185,10 +239,7 @@ const AppSidebar: React.FC = () => {
   }, [openSubmenu]);
 
   const renderWorkspaceItem = (workspace: any, index: number) => {
-    console.log('workspace', workspace);
-
     const isWorkspaceExpanded = expandedWorkspaces[workspace.id];
-    console.log('isWorkspaceExpanded', isWorkspaceExpanded);
 
     const showContent = isExpanded || isHovered || isMobileOpen;
 
@@ -229,21 +280,27 @@ const AppSidebar: React.FC = () => {
           )}
 
           {showContent && (
-            <span className="menu-item-text flex-1 text-left">
+            <div
+              onClick={() => router.push(`/${workspace.id}/spaces`)}
+              className="menu-item-text flex-1 text-left"
+            >
               {workspace.name}
-            </span>
+            </div>
           )}
 
           {showContent && (
-            <button
-              className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Add workspace action
-              }}
-            >
-              <PlusIcon className="w-3 h-3" />
-            </button>
+            <Tooltip title="Add Space">
+              <button
+                className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openSpaceModal();
+                  setWorkspaceId(workspace.id);
+                }}
+              >
+                <PlusIcon className="w-3 h-3" />
+              </button>
+            </Tooltip>
           )}
         </div>
 
@@ -251,13 +308,11 @@ const AppSidebar: React.FC = () => {
         {isWorkspaceExpanded && showContent && workspace.spaces && (
           <div className="ml-6 mt-1 space-y-0.5">
             {workspace.spaces.map((space: any) => {
-              console.log('space', space);
-
               const isSpaceExpanded = expandedSpaces[space.id];
               return (
                 <div key={space.id}>
                   {/* Space Header */}
-                  <button
+                  <div
                     onClick={() => toggleSpace(space.id)}
                     className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-sm group ${
                       isActive(space.slug)
@@ -276,10 +331,28 @@ const AppSidebar: React.FC = () => {
                       style={{ color: space.color }}
                     />
 
-                    <span className="flex-1 text-left truncate">
+                    <div
+                      onClick={() =>
+                        router.push(`/${workspace.id}/${space.id}/projects`)
+                      }
+                      className="flex-1 text-left truncate cursor-pointer"
+                    >
                       {space.name}
-                    </span>
-                  </button>
+                    </div>
+
+                    <Tooltip title="Add Project">
+                      <button
+                        className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openProjectModal();
+                          setSpaceId(space.id);
+                        }}
+                      >
+                        <PlusIcon className="w-3 h-3" />
+                      </button>
+                    </Tooltip>
+                  </div>
 
                   {/* Projects inside Space */}
                   {isSpaceExpanded && space.projects && (
@@ -487,18 +560,23 @@ const AppSidebar: React.FC = () => {
           <div className="flex items-center justify-between px-3 py-2 mb-2">
             {(isExpanded || isHovered || isMobileOpen) && (
               <>
-                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
-                  Workspaces
-                </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openWorkspaceModal();
-                  }}
-                  className="p-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded flex items-center justify-center"
+                <Link
+                  href="/workspaces"
+                  className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase cursor-pointer"
                 >
-                  <PlusIcon className="w-4 h-4 text-gray-500" />
-                </button>
+                  Workspaces
+                </Link>
+                <Tooltip title="Create Workspace">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openWorkspaceModal();
+                    }}
+                    className="p-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded flex items-center justify-center"
+                  >
+                    <PlusIcon className="w-4 h-4 text-gray-500" />
+                  </button>
+                </Tooltip>
               </>
             )}
           </div>
@@ -615,6 +693,34 @@ const AppSidebar: React.FC = () => {
           ref={workspaceFormRef}
           onSubmit={handleWorkspaceSubmit}
           onFinishModalClose={handleCloseWorkspaceModal}
+        />
+      </Modal>
+
+      <Modal
+        open={isSpaceModalOpen}
+        onCancel={handleCloseSpaceModal}
+        footer={null}
+        title="Create Space"
+      >
+        <SpaceForm
+          ref={spaceFormRef}
+          onSubmit={handleSpaceSubmit}
+          onFinishModalClose={handleCloseSpaceModal}
+          workspaceId={workspaceId}
+        />
+      </Modal>
+
+      <Modal
+        open={isProjectModalOpen}
+        onCancel={handleCloseProjectModal}
+        footer={null}
+        title="Create Project"
+      >
+        <ProjectForm
+          ref={spaceFormRef}
+          onSubmit={handleProjectSubmit}
+          onFinishModalClose={handleCloseProjectModal}
+          spaceId={spaceId}
         />
       </Modal>
     </aside>

@@ -12,6 +12,9 @@ export const createWorkspace = async (payload: CreateWorkspaceDto) => {
 export const getAllWorkspaces = async (params?: Record<string, any>) => {
   return await api.get('/workspaces/my-workspaces', { params });
 };
+export const getAllNested = async () => {
+  return await api.get('/workspaces/nested');
+};
 
 export const getWorkspaceById = async (id: string) => {
   const { data } = await api.get(`/workspaces/${id}`);

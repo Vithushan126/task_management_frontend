@@ -11,29 +11,34 @@ import BaseSelect from '@/components/antd-form/BaseSelect';
 import { ProjectStatus } from '@/types/project';
 import dayjs from 'dayjs';
 
-type ProjectFormProps = {
+type TaskFormFormProps = {
   onSubmit: (values: any) => void;
   initialValues?: any;
   onFinishModalClose?: () => void;
   workspaceId?: string;
 };
 
-const ProjectForm = forwardRef(
+const TaskForm = forwardRef(
   (
-    { onSubmit, initialValues, onFinishModalClose, workspaceId }: ProjectFormProps,
+    {
+      onSubmit,
+      initialValues,
+      onFinishModalClose,
+      workspaceId,
+    }: TaskFormFormProps,
     ref,
   ) => {
     const [form] = Form.useForm();
     const dispatch = useAppDispatch();
     const { loading } = useAppSelector((state) => state.project);
     const { spaces } = useAppSelector((state) => state.space);
-    const [selectedSpace, setSelectedSpace] = useState<string>('');
+    const [selectedProject, setSelectedProject] = useState<string>('');
 
     // Expose resetForm method to parent
     useImperativeHandle(ref, () => ({
       resetForm: () => {
         form.resetFields();
-        setSelectedSpace('');
+        setSelectedProject('');
       },
     }));
 
@@ -47,83 +52,83 @@ const ProjectForm = forwardRef(
       if (initialValues) {
         const clonedValues = {
           ...initialValues,
-          startDate: initialValues.startDate ? dayjs(initialValues.startDate) : null,
+          startDate: initialValues.startDate
+            ? dayjs(initialValues.startDate)
+            : null,
           endDate: initialValues.endDate ? dayjs(initialValues.endDate) : null,
         };
         form.setFieldsValue(clonedValues);
-        setSelectedSpace(initialValues.spaceId || '');
+        setSelectedProject(initialValues.spaceId || '');
       } else {
         form.resetFields();
-        setSelectedSpace('');
+        setSelectedProject('');
       }
     }, [initialValues, form]);
 
     const handleFinish = (values: any) => {
       const payload = {
-        name: values.name,
+        title: values.title,
         description: values.description,
-        status: values.status,
+        // status: values.status,
         priority: values.priority,
-        startDate: values.startDate ? values.startDate.toISOString() : null,
-        endDate: values.endDate ? values.endDate.toISOString() : null,
-        spaceId: selectedSpace,
+        dueDate: values.dueDate ? values.dueDate.toISOString() : null,
+        projectId: selectedProject,
       };
       onSubmit(payload);
     };
 
     const handleClose = () => {
       form.resetFields();
-      setSelectedSpace('');
+      setSelectedProject('');
       onFinishModalClose?.();
     };
 
     const statusOptions = [
-      { label: 'Planning', value: ProjectStatus.PLANNING },
-      { label: 'Active', value: ProjectStatus.ACTIVE },
-      { label: 'On Hold', value: ProjectStatus.ON_HOLD },
-      { label: 'Completed', value: ProjectStatus.COMPLETED },
-      { label: 'Cancelled', value: ProjectStatus.CANCELLED },
+      { label: 'NEW', value: 'NEW' },
+      { label: 'PENDING', value: 'PENDING' },
+      { label: 'INPROGRESS', value: 'INPROGRESS' },
+      { label: 'COMPLETED', value: 'COMPLETED' },
     ];
 
     const priorityOptions = [
-      { label: 'Low', value: 'low' },
-      { label: 'Medium', value: 'medium' },
-      { label: 'High', value: 'high' },
-      { label: 'Urgent', value: 'urgent' },
+      { label: 'LOW', value: 'LOW' },
+      { label: 'MEDIUM', value: 'MEDIUM' },
+      { label: 'HIGH', value: 'HIGH' },
+      { label: 'URGENT', value: 'URGENT' },
     ];
 
-    const spaceOptions = spaces.map(space => ({
-      label: space.name,
-      value: space.id,
+    const spaceOptions = spaces.map((project) => ({
+      label: project.name,
+      value: project.id,
     }));
 
     return (
       <BaseForm
         form={form}
         onFinish={handleFinish}
-        className="grid grid-cols-1 gap-4"
+        className="grid grid-cols-1 "
       >
         <BaseInput
-          name="name"
-          label="Project Name"
-          placeholder="Enter project name"
+          name="title"
+          label="Task Name"
+          placeholder="Enter task name"
           required
         />
 
         <BaseTextArea
           name="description"
           label="Description"
-          placeholder="Enter project description"
+          placeholder="Enter Task description"
           rows={3}
         />
 
         <BaseSelect
-          name="spaceId"
-          label="Space"
-          placeholder="Select a space"
+          name="projectId"
+          label="Project"
+          placeholder="Select a Project"
           options={spaceOptions}
-          // value={selectedSpace}
-          onChange={setSelectedSpace}
+          //   value={selectedSpace}
+          onChange={setSelectedProject}
           required
         />
 
@@ -146,27 +151,13 @@ const ProjectForm = forwardRef(
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Form.Item
-            name="startDate"
-            label="Start Date"
-            className="mb-0"
-          >
-            <DatePicker 
-              className="w-full" 
-              placeholder="Select start date"
-            />
+          <Form.Item name="dueDate" label="Due Date" className="mb-0">
+            <DatePicker className="w-full" placeholder="Select Due date" />
           </Form.Item>
 
-          <Form.Item
-            name="endDate"
-            label="End Date"
-            className="mb-0"
-          >
-            <DatePicker 
-              className="w-full" 
-              placeholder="Select end date"
-            />
-          </Form.Item>
+          {/* <Form.Item name="endDate" label="End Date" className="mb-0">
+            <DatePicker className="w-full" placeholder="Select end date" />
+          </Form.Item> */}
         </div>
 
         <Form.Item className="mb-0">
@@ -182,5 +173,5 @@ const ProjectForm = forwardRef(
   },
 );
 
-ProjectForm.displayName = 'ProjectForm';
-export default ProjectForm;
+TaskForm.displayName = 'TaskForm';
+export default TaskForm;

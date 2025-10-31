@@ -20,16 +20,20 @@ import { getProjectColumns } from './columns';
 import ProjectForm from './ProjectForm';
 import ProjectDetailsModal from './ProjectDetailsModal';
 import ProjectMembersModal from './ProjectMembersModal';
+import { getAllSpaces } from '@/redux/feature/space/space-thunk';
+import { useParams } from 'next/navigation';
 
 export default function Projects() {
+  const params = useParams();
+  const spaceId = params.spaceId;
   const dispatch = useAppDispatch();
   const formRef = useRef<any>(null);
   const { organization } = useAppSelector((state) => state.auth);
   const { projects, loading, total } = useAppSelector((state) => state.project);
-  const { workspaces } = useAppSelector((state) => state.workspace);
+  const { spaces } = useAppSelector((state) => state.space);
 
   const [editingRecord, setEditingRecord] = useState<Project | null>(null);
-  const [selectedWorkspace, setSelectedWorkspace] = useState<string>('');
+  const [selectedSpace, setSelectedSpace] = useState<any>(spaceId);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
@@ -43,7 +47,7 @@ export default function Projects() {
   useEffect(() => {
     if (organization?.id) {
       dispatch(
-        getAllWorkspaces({
+        getAllSpaces({
           organizationId: organization.id,
           page: 1,
           limit: 100,
@@ -54,17 +58,17 @@ export default function Projects() {
 
   // Set default workspace when workspaces are loaded
   useEffect(() => {
-    if (workspaces.length > 0 && !selectedWorkspace) {
-      setSelectedWorkspace(workspaces[0].id);
+    if (spaces.length > 0 && !selectedSpace) {
+      setSelectedSpace(spaces[0].id);
     }
-  }, [workspaces, selectedWorkspace]);
+  }, [spaces, selectedSpace]);
 
   // Load projects when workspace is selected
   useEffect(() => {
-    if (selectedWorkspace) {
-      dispatch(getAllProjects({ workspaceId: selectedWorkspace }));
+    if (selectedSpace) {
+      dispatch(getAllProjects({ spaceId: selectedSpace }));
     }
-  }, [dispatch, selectedWorkspace]);
+  }, [dispatch, selectedSpace]);
 
   const handleEdit = (record: Project) => {
     setEditingRecord(record);
@@ -75,8 +79,8 @@ export default function Projects() {
     try {
       await dispatch(deleteProject(id)).unwrap();
       toast.success('Project deleted successfully!');
-      if (selectedWorkspace) {
-        dispatch(getAllProjects({ workspaceId: selectedWorkspace }));
+      if (selectedSpace) {
+        dispatch(getAllProjects({ spaceId: selectedSpace }));
       }
     } catch (error) {
       toast.error('Failed to delete project.');
@@ -117,8 +121,8 @@ export default function Projects() {
         toast.success('Project created successfully!');
       }
 
-      if (selectedWorkspace) {
-        dispatch(getAllProjects({ workspaceId: selectedWorkspace }));
+      if (selectedSpace) {
+        dispatch(getAllProjects({ spaceId: selectedSpace }));
       }
       closeModal();
       formRef.current?.resetForm();
@@ -128,37 +132,37 @@ export default function Projects() {
     }
   };
 
-  const handleWorkspaceChange = (workspaceId: string) => {
-    setSelectedWorkspace(workspaceId);
-    setPagination({ current: 1, pageSize: 10 });
-  };
+  // const handleWorkspaceChange = (spaceId: string) => {
+  //   setSelectedSpace(spaceId);
+  //   setPagination({ current: 1, pageSize: 10 });
+  // };
 
-  const workspaceOptions = workspaces.map((workspace) => ({
-    label: workspace.name,
-    value: workspace.id,
+  const spaceOptions = spaces.map((space) => ({
+    label: space.name,
+    value: space.id,
   }));
 
   return (
     <div className="space-y-4">
       <PageBreadcrumb pageTitle="Project Management" />
 
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Workspace:
+            Space:
           </span>
           <Select
             placeholder="Select workspace"
-            value={selectedWorkspace}
+            value={selectedSpace}
             onChange={handleWorkspaceChange}
-            options={workspaceOptions}
+            options={spaceOptions}
             className="w-64"
-            loading={!workspaces.length}
+            loading={!spaces.length}
           />
         </div>
-      </div>
+      </div> */}
 
-      {selectedWorkspace && (
+      {selectedSpace && (
         <SearchableTable
           columns={columns}
           data={projects}
@@ -171,7 +175,7 @@ export default function Projects() {
               ref={formRef}
               onSubmit={handleCreateOrUpdate}
               initialValues={editingRecord || undefined}
-              workspaceId={selectedWorkspace}
+              workspaceId={selectedSpace}
               onFinishModalClose={() => {
                 closeModal();
                 setEditingRecord(null);
@@ -217,13 +221,13 @@ export default function Projects() {
           setSelectedProject(null);
         }}
         onMemberAdded={() => {
-          if (selectedWorkspace) {
-            dispatch(getAllProjects({ workspaceId: selectedWorkspace }));
+          if (selectedSpace) {
+            dispatch(getAllProjects({ spaceId: selectedSpace }));
           }
         }}
       />
 
-      {!selectedWorkspace && workspaces.length === 0 && (
+      {!selectedSpace && spaces.length === 0 && (
         <div className="text-center py-8">
           <p className="text-gray-500 dark:text-gray-400">
             No workspaces found. Please create a workspace first.

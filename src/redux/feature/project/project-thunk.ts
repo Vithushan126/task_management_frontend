@@ -1,6 +1,12 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import * as ProjectAPI from '@/service/project.api';
-import { CreateProjectDto, UpdateProjectDto, AddProjectMemberDto, GetProjectsParams } from '@/types/project';
+import {
+  CreateProjectDto,
+  UpdateProjectDto,
+  AddProjectMemberDto,
+  GetProjectsParams,
+} from '@/types/project';
+import { getAllNested } from '../workspace/workspace-thunk';
 
 export const getAllProjects = createAsyncThunk<
   any,
@@ -12,7 +18,7 @@ export const getAllProjects = createAsyncThunk<
     return response.data;
   } catch (error) {
     return thunkAPI.rejectWithValue(
-      error instanceof Error ? error.message : 'Failed to fetch projects'
+      error instanceof Error ? error.message : 'Failed to fetch projects',
     );
   }
 });
@@ -24,10 +30,10 @@ export const getProjectById = createAsyncThunk(
       return await ProjectAPI.getProjectById(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to fetch project'
+        error instanceof Error ? error.message : 'Failed to fetch project',
       );
     }
-  }
+  },
 );
 
 export const getProjectStats = createAsyncThunk(
@@ -37,36 +43,43 @@ export const getProjectStats = createAsyncThunk(
       return await ProjectAPI.getProjectStats(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to fetch project stats'
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch project stats',
       );
     }
-  }
+  },
 );
 
 export const createProject = createAsyncThunk(
   'project/create',
   async (payload: CreateProjectDto, thunkAPI) => {
     try {
-      return await ProjectAPI.createProject(payload);
+      const response = await ProjectAPI.createProject(payload);
+      thunkAPI.dispatch(getAllNested());
+      return response;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to create project'
+        error instanceof Error ? error.message : 'Failed to create project',
       );
     }
-  }
+  },
 );
 
 export const updateProject = createAsyncThunk(
   'project/update',
-  async ({ id, payload }: { id: string; payload: UpdateProjectDto }, thunkAPI) => {
+  async (
+    { id, payload }: { id: string; payload: UpdateProjectDto },
+    thunkAPI,
+  ) => {
     try {
       return await ProjectAPI.updateProject(id, payload);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to update project'
+        error instanceof Error ? error.message : 'Failed to update project',
       );
     }
-  }
+  },
 );
 
 export const deleteProject = createAsyncThunk(
@@ -76,34 +89,40 @@ export const deleteProject = createAsyncThunk(
       return await ProjectAPI.deleteProject(id);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to delete project'
+        error instanceof Error ? error.message : 'Failed to delete project',
       );
     }
-  }
+  },
 );
 
 export const addProjectMember = createAsyncThunk(
   'project/addMember',
-  async ({ id, payload }: { id: string; payload: AddProjectMemberDto }, thunkAPI) => {
+  async (
+    { id, payload }: { id: string; payload: AddProjectMemberDto },
+    thunkAPI,
+  ) => {
     try {
       return await ProjectAPI.addProjectMember(id, payload);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to add member'
+        error instanceof Error ? error.message : 'Failed to add member',
       );
     }
-  }
+  },
 );
 
 export const removeProjectMember = createAsyncThunk(
   'project/removeMember',
-  async ({ projectId, userId }: { projectId: string; userId: string }, thunkAPI) => {
+  async (
+    { projectId, userId }: { projectId: string; userId: string },
+    thunkAPI,
+  ) => {
     try {
       return await ProjectAPI.removeProjectMember(projectId, userId);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to remove member'
+        error instanceof Error ? error.message : 'Failed to remove member',
       );
     }
-  }
+  },
 );
