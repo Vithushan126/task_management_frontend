@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useRef, useState } from 'react';
 import {
   PlusOutlined,
@@ -18,29 +20,54 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import dayjs from 'dayjs';
 import { useModal } from '@/hooks/useModal';
 import TaskForm from './TaskForm';
-import { useAppDispatch } from '@/hooks/use-redux';
+import { useAppDispatch, useAppSelector } from '@/hooks/use-redux';
+import { Task, User } from '@/types/tasks';
+import { createTasks, getAllTasks } from '@/redux/feature/task/task-thunk';
+import { useParams } from 'next/navigation';
+import toast from 'react-hot-toast';
 
-type User = {
-  id: number;
-  name: string;
-  avatar: string;
-};
-
-type Task = {
-  id: number | string;
-  name: string;
-  assignees: User[];
-  status: string;
-  due_date: string | null;
-  priority: string;
-  subtasks?: Task[];
-  isNew?: boolean;
-  parentId?: number;
-};
+const { Option } = Select;
 
 const AutoSaveTable = () => {
   const dispatch = useAppDispatch();
-  const { Option } = Select;
+  const { tasksValue, loading: reduxLoading } = useAppSelector(
+    (state) => state.task,
+  );
+  const params = useParams();
+  const projectId = params.projectId;
+
+  // Local state
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hoveredTaskId, setHoveredTaskId] = useState<number | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [expandedRows, setExpandedRows] = useState<Set<number | string>>(
+    new Set(),
+  );
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error' | 'warning';
+    text: string;
+  } | null>(null);
+  const [newSubtask, setNewSubtask] = useState<{
+    parentId: number;
+    title: string;
+    assignees: User[];
+    status: string;
+    dueDate: string | null;
+    priority: string;
+  } | null>(null);
+
+  const {
+    isOpen: isTaskModalOpen,
+    openModal: openTaskModal,
+    closeModal: closeTaskModal,
+  } = useModal(false);
+
+  const taskFormRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Constants
   const users: User[] = [
     {
       id: 1,
@@ -84,75 +111,6 @@ const AutoSaveTable = () => {
     },
   ];
 
-  const sampleTasks: Task[] = [
-    {
-      id: 1,
-      name: 'VMS Feature List',
-      assignees: [
-        users[0],
-        users[1],
-        users[2],
-        users[3],
-        users[4],
-        users[5],
-        users[6],
-        users[7],
-      ],
-      status: 'NEW',
-      due_date: null,
-      priority: 'Medium',
-      subtasks: [
-        {
-          id: 11,
-          name: 'UI Design for VMS',
-          assignees: [users[0]],
-          status: 'INPROGRESS',
-          due_date: '2025-11-01',
-          priority: 'High',
-          subtasks: [],
-        },
-        {
-          id: 12,
-          name: 'API Integration',
-          assignees: [users[1]],
-          status: 'NEW',
-          due_date: null,
-          priority: 'Medium',
-          subtasks: [
-            {
-              id: 121,
-              name: 'Auth API Integration',
-              assignees: [users[2]],
-              status: 'INPROGRESS',
-              due_date: '2025-11-08',
-              priority: 'Urgent',
-              subtasks: [],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: 'API Testing',
-      assignees: [users[2]],
-      status: 'INPROGRESS',
-      due_date: '2025-11-08',
-      priority: 'Urgent',
-      subtasks: [
-        {
-          id: 21,
-          name: 'API Testing',
-          assignees: [users[2]],
-          status: 'INPROGRESS',
-          due_date: '2025-11-08',
-          priority: 'Urgent',
-          subtasks: [],
-        },
-      ],
-    },
-  ];
-
   const statusOptions = [
     {
       value: 'NEW',
@@ -187,82 +145,43 @@ const AutoSaveTable = () => {
     { value: 'Urgent', label: 'Urgent', color: '#F44336', bg: 'bg-red-500' },
   ];
 
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [hoveredTaskId, setHoveredTaskId] = useState<number | null>(null);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [expandedRows, setExpandedRows] = useState<Set<number | string>>(
-    new Set(),
-  );
-  const [message, setMessage] = useState<{
-    type: 'success' | 'error' | 'warning';
-    text: string;
-  } | null>(null);
-
-  const [newSubtask, setNewSubtask] = useState<{
-    parentId: number;
-    name: string;
-    assignees: User[];
-    status: string;
-    due_date: string | null;
-    priority: string;
-  } | null>(null);
-
-  const {
-    isOpen: isTaskModalOpen,
-    openModal: openTaskModal,
-    closeModal: closeTaskModal,
-  } = useModal(false);
-
-  const taskFormRef = useRef<any>(null);
-  const inputRef = useRef<any>(null);
-
-  const handleCloseTaskModal = () => {
-    closeTaskModal();
-    taskFormRef.current?.resetForm?.();
+  // Fetch all tasks
+  const getAllTask = async () => {
+    try {
+      await dispatch(getAllTasks({ projectId: projectId })).unwrap();
+    } catch (error) {
+      console.error('Failed to fetch tasks:', error);
+      showMessage('error', 'Failed to load tasks');
+    }
   };
 
-  const handleTaskSubmit = async (values: any) => {
-    // try {
-    //   console.log('New Workspace Payload:', values);
-    //   await dispatch(
-    //     createTask({
-    //       ...values,
-    //       organizationId: organization?.id,
-    //     }),
-    //   ).unwrap();
-    //   dispatch(
-    //     getAllWorkspaces({
-    //       organizationId: organization.id,
-    //     }),
-    //   );
-    //   toast.success('Workspace created successfully!');
-    //   handleCloseWorkspaceModal();
-    // } catch (error: any) {
-    //   console.error('Workspace creation failed:', error);
-    //   toast.error(
-    //     error?.message || 'Failed to create workspace. Please try again.',
-    //   );
-    // }
-  };
-
+  // Initial fetch - removed tasksValue.length from dependencies to prevent infinite loop
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setTasks(sampleTasks);
-      setLoading(false);
-    }, 800);
-  }, []);
+    if (projectId) {
+      getAllTask();
+    }
+  }, [projectId]);
 
+  // Update local tasks when Redux state changes
+  useEffect(() => {
+    if (tasksValue) {
+      setTasks(tasksValue);
+    }
+  }, [dispatch, tasksValue]);
+
+  // Show message notification
   const showMessage = (type: 'success' | 'error' | 'warning', text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 3000);
   };
 
-  let timer: any;
+  // Auto-save handler with proper cleanup
   const handleAutoSave = (id: number | string, field: string, value: any) => {
-    clearTimeout(timer);
-    timer = setTimeout(async () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    timerRef.current = setTimeout(async () => {
       try {
         console.log(`Auto-saved Task ID: ${id} | ${field}: ${value}`);
         if (typeof id === 'number') {
@@ -270,11 +189,22 @@ const AutoSaveTable = () => {
           showMessage('success', 'Task auto-saved');
         }
       } catch (err) {
+        console.error('Auto-save error:', err);
         showMessage('error', 'Failed to auto-save');
       }
     }, 600);
   };
 
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
+
+  // Update task recursively
   const updateTaskRecursively = (
     list: Task[],
     id: number | string,
@@ -292,12 +222,14 @@ const AutoSaveTable = () => {
       return task;
     });
 
+  // Handle field change
   const handleChange = (id: number | string, field: string, value: any) => {
     const updated = updateTaskRecursively(tasks, id, field, value);
     setTasks(updated);
     handleAutoSave(id, field, value);
   };
 
+  // Delete task recursively
   const deleteTaskRecursively = (list: Task[], id: number | string): Task[] => {
     return list
       .filter((task) => task.id !== id)
@@ -312,32 +244,60 @@ const AutoSaveTable = () => {
       });
   };
 
+  // Handle delete task
   const handleDeleteTask = (id: number | string) => {
     const updated = deleteTaskRecursively(tasks, id);
     setTasks(updated);
     showMessage('success', 'Task deleted successfully');
   };
 
+  // Add subtask
   const handleAddSubtask = (parentId: number) => {
     setNewSubtask({
       parentId,
-      name: '',
+      title: '',
       assignees: [],
       status: 'NEW',
-      due_date: null,
-      priority: 'Medium',
+      dueDate: null,
+      priority: 'MEDIUM',
     });
 
-    // Expand the parent row
     setExpandedRows((prev) => new Set(prev).add(parentId));
-
     setTimeout(() => inputRef.current?.focus(), 100);
   };
 
-  const handleSaveSubtask = () => {
-    if (!newSubtask?.name?.trim()) {
-      showMessage('warning', 'Subtask name is required');
+  // Save subtask
+  const handleSaveSubtask = async () => {
+    if (!newSubtask?.title?.trim()) {
+      showMessage('warning', 'Subtask title is required');
       return;
+    }
+    console.log('newSubtask', newSubtask);
+    try {
+      // Prepare API payload for subtask
+      const subtaskPayload = {
+        title: newSubtask.title,
+        description: '', // Add description field if needed
+        priority: newSubtask.priority,
+        parentTaskId: String(newSubtask.parentId),
+        // parentTaskId: newSubtask.parentId, // This is the key - links to parent task
+        dueDate: newSubtask.dueDate,
+        assigneeId: '9abde8d3-a4b5-4e47-9af8-1f2bfce8393f', // Or get from selected assignees
+        projectId: projectId as string,
+      };
+
+      // Call API to create subtask
+      await dispatch(createTasks(subtaskPayload)).unwrap();
+
+      // Refresh tasks to get updated data from server
+      await getAllTask();
+
+      // Reset form
+      setNewSubtask(null);
+      setOpenDropdown(null);
+    } catch (error) {
+      console.error('Failed to create subtask:', error);
+      showMessage('error', error?.message || 'Failed to create subtask');
     }
 
     const addSubtaskRecursively = (list: Task[]): Task[] =>
@@ -345,14 +305,13 @@ const AutoSaveTable = () => {
         if (task.id === newSubtask.parentId) {
           const newSub: Task = {
             id: Date.now(),
-            name: newSubtask.name,
+            title: newSubtask.title,
             assignees: newSubtask.assignees,
             status: newSubtask.status,
-            due_date: newSubtask.due_date,
+            dueDate: newSubtask.dueDate,
             priority: newSubtask.priority,
             subtasks: [],
           };
-          console.log('subtask', newSub);
 
           return { ...task, subtasks: [...(task.subtasks || []), newSub] };
         }
@@ -363,48 +322,52 @@ const AutoSaveTable = () => {
       });
 
     const updated = addSubtaskRecursively(tasks);
+    console.log('updated', updated);
+
     setTasks(updated);
     showMessage('success', 'Subtask added');
 
-    // Keep the same parent and open a new subtask row
     const currentParentId = newSubtask.parentId;
     setNewSubtask({
       parentId: currentParentId,
-      name: '',
+      title: '',
       assignees: [],
       status: 'NEW',
-      due_date: null,
+      dueDate: null,
       priority: 'Medium',
     });
 
     setOpenDropdown(null);
-
-    // Focus on the new input field
     setTimeout(() => inputRef.current?.focus(), 100);
   };
 
+  // Cancel subtask
   const handleCancelSubtask = () => {
     setNewSubtask(null);
     setOpenDropdown(null);
   };
 
-  const handleClickOutside = (e: any) => {
-    if (
-      newSubtask &&
-      !e.target.closest('.new-subtask-row') &&
-      !e.target.closest('.ant-picker-dropdown') &&
-      !e.target.closest('.ant-select-dropdown')
-    ) {
-      setNewSubtask(null);
-    }
-  };
-
+  // Handle click outside for new subtask
   useEffect(() => {
-    if (newSubtask) document.addEventListener('mousedown', handleClickOutside);
-    else document.removeEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        newSubtask &&
+        !(e.target as HTMLElement).closest('.new-subtask-row') &&
+        !(e.target as HTMLElement).closest('.ant-picker-dropdown') &&
+        !(e.target as HTMLElement).closest('.ant-select-dropdown')
+      ) {
+        setNewSubtask(null);
+      }
+    };
+
+    if (newSubtask) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
+    }
   }, [newSubtask]);
 
+  // Handle click outside for dropdown
   useEffect(() => {
     const handleClickOutsideDropdown = (e: MouseEvent) => {
       const dropdownElements = document.querySelectorAll('.assignee-dropdown');
@@ -423,6 +386,7 @@ const AutoSaveTable = () => {
       document.removeEventListener('mousedown', handleClickOutsideDropdown);
   }, []);
 
+  // Toggle expand/collapse
   const toggleExpand = (id: number | string) => {
     setExpandedRows((prev) => {
       const newSet = new Set(prev);
@@ -435,6 +399,37 @@ const AutoSaveTable = () => {
     });
   };
 
+  // Close task modal
+  const handleCloseTaskModal = () => {
+    closeTaskModal();
+    taskFormRef.current?.resetForm?.();
+  };
+
+  // Handle task submit
+  const handleTaskSubmit = async (values: any) => {
+    try {
+      const payload = {
+        title: values.title,
+        description: values.description,
+        priority: values.priority,
+        parentTaskId: null,
+        dueDate: values.dueDate,
+        assigneeId: '9abde8d3-a4b5-4e47-9af8-1f2bfce8393f',
+        // assigneeId: values.assignees.map((u: User) => u.id),
+        // status: values.status,
+        projectId: projectId as string,
+      };
+      dispatch(createTasks(payload));
+      toast.success('Task created successfully!');
+      handleCloseTaskModal();
+      getAllTask(); // Refresh tasks
+    } catch (error: any) {
+      console.error('Task creation failed:', error);
+      showMessage('error', error?.message || 'Failed to create task');
+    }
+  };
+
+  // Render task row
   const renderTaskRow = (task: Task, level: number = 0) => {
     const isExpanded = expandedRows.has(task.id);
     const hasSubtasks = task.subtasks && task.subtasks.length > 0;
@@ -451,13 +446,9 @@ const AutoSaveTable = () => {
           >
             <div
               className="flex items-center gap-2 group"
-              onMouseEnter={() =>
-                typeof task.id === 'number' &&
-                setHoveredTaskId(task.id as number)
-              }
+              onMouseEnter={() => setHoveredTaskId(task.id as number)}
               onMouseLeave={() => setHoveredTaskId(null)}
             >
-              {/* Expand/Collapse Icon */}
               {shouldShowExpander && (
                 <button
                   onClick={() => toggleExpand(task.id)}
@@ -471,21 +462,19 @@ const AutoSaveTable = () => {
                 </button>
               )}
 
-              {/* Input Field */}
               <div className="relative flex-1">
                 <input
                   type="text"
-                  value={task.name}
+                  value={task.title}
                   onChange={(e) =>
-                    handleChange(task.id, 'name', e.target.value)
+                    handleChange(task.id, 'title', e.target.value)
                   }
                   className="w-full px-2 py-1 rounded border-transparent hover:border hover:border-gray-300 focus:border-blue-500 focus:outline-none transition-all"
                   style={{ minWidth: '200px' }}
                 />
               </div>
 
-              {/* Add Subtask Button (outside input) */}
-              {isHovered && typeof task.id === 'number' && (
+              {isHovered && (
                 <Tooltip title="Add Subtask">
                   <button
                     onClick={() => handleAddSubtask(task.id as number)}
@@ -523,13 +512,13 @@ const AutoSaveTable = () => {
                   </div>
                 ))}
 
-                {task.assignees?.length > 5 && (
+                {task.assignees && task.assignees.length > 5 && (
                   <div className="w-5 h-5 flex items-center justify-center rounded-full bg-gray-200 text-xs text-gray-600">
-                    +{task.assignees?.length - 5}
+                    +{task.assignees.length - 5}
                   </div>
                 )}
 
-                {task.assignees?.length === 0 && (
+                {(!task.assignees || task.assignees.length === 0) && (
                   <span className="text-gray-400 text-sm">
                     Select assignees
                   </span>
@@ -548,14 +537,17 @@ const AutoSaveTable = () => {
                           (u) => u.id === user.id,
                         );
                         const updatedAssignees = alreadySelected
-                          ? task.assignees?.filter((u) => u.id !== user.id)
-                          : [...task.assignees, user];
+                          ? task.assignees?.filter((u) => u.id !== user.id) ||
+                            []
+                          : [...(task.assignees || []), user];
                         handleChange(task.id, 'assignees', updatedAssignees);
                       }}
                     >
                       <input
                         type="checkbox"
-                        checked={task.assignees?.some((u) => u.id === user.id)}
+                        checked={
+                          task.assignees?.some((u) => u.id === user.id) || false
+                        }
                         readOnly
                         className="w-4 h-4"
                       />
@@ -577,8 +569,7 @@ const AutoSaveTable = () => {
             </div>
           </td>
 
-          {/* Status */}
-          <td className=" py-2">
+          <td className="py-2">
             <Select
               value={task.status}
               onChange={(value) => handleChange(task.id, 'status', value)}
@@ -600,12 +591,11 @@ const AutoSaveTable = () => {
             </Select>
           </td>
 
-          {/* Due Date */}
           <td className="p-3 py-2">
             <DatePicker
-              value={task.due_date ? dayjs(task.due_date) : null}
+              value={task.dueDate ? dayjs(task.dueDate) : null}
               onChange={(date, dateString) =>
-                handleChange(task.id, 'due_date', dateString || null)
+                handleChange(task.id, 'dueDate', dateString || null)
               }
               format="YYYY-MM-DD"
               className="w-full px-2 py-1 rounded"
@@ -616,8 +606,7 @@ const AutoSaveTable = () => {
             />
           </td>
 
-          {/* Priority */}
-          <td className="py-2  max-w-[100px]">
+          <td className="py-2 max-w-[100px]">
             <Select
               value={task.priority}
               onChange={(value) => handleChange(task.id, 'priority', value)}
@@ -639,7 +628,6 @@ const AutoSaveTable = () => {
             </Select>
           </td>
 
-          {/* Action Column */}
           <td className="py-2 max-w-[10px]">
             <div className="flex items-center justify-center">
               <Popconfirm
@@ -670,7 +658,6 @@ const AutoSaveTable = () => {
               )}
             {newSubtask && newSubtask.parentId === task.id && (
               <tr className="border-b border-gray-200 bg-blue-50 new-subtask-row">
-                {/* Subtask Name */}
                 <td
                   className="p-3 py-2"
                   style={{ paddingLeft: `${(level + 1) * 24 + 12}px` }}
@@ -678,15 +665,16 @@ const AutoSaveTable = () => {
                   <input
                     ref={inputRef}
                     type="text"
-                    placeholder="Enter subtask name"
-                    value={newSubtask.name}
+                    placeholder="Enter subtask title"
+                    value={newSubtask.title}
                     onChange={(e) =>
                       setNewSubtask((s) =>
-                        s ? { ...s, name: e.target.value } : s,
+                        s ? { ...s, title: e.target.value } : s,
                       )
                     }
-                    onKeyPress={(e) => {
+                    onKeyDown={(e) => {
                       if (e.key === 'Enter') {
+                        e.preventDefault(); // optional — stops form submission or blur
                         handleSaveSubtask();
                       }
                     }}
@@ -695,7 +683,6 @@ const AutoSaveTable = () => {
                   />
                 </td>
 
-                {/* Subtask Assignees */}
                 <td className="p-3 py-2">
                   <div className="relative">
                     <div
@@ -719,11 +706,12 @@ const AutoSaveTable = () => {
                         </div>
                       ))}
 
-                      {newSubtask.assignees?.length > 5 && (
-                        <div className="w-5 h-5 flex items-center justify-center rounded-full bg-gray-200 text-xs text-gray-600">
-                          +{newSubtask.assignees?.length - 5}
-                        </div>
-                      )}
+                      {newSubtask.assignees &&
+                        newSubtask.assignees.length > 5 && (
+                          <div className="w-5 h-5 flex items-center justify-center rounded-full bg-gray-200 text-xs text-gray-600">
+                            +{newSubtask.assignees.length - 5}
+                          </div>
+                        )}
 
                       {(!newSubtask.assignees ||
                         newSubtask.assignees.length === 0) && (
@@ -748,7 +736,7 @@ const AutoSaveTable = () => {
                               const updatedAssignees = alreadySelected
                                 ? newSubtask.assignees?.filter(
                                     (u) => u.id !== user.id,
-                                  )
+                                  ) || []
                                 : [...(newSubtask.assignees || []), user];
                               setNewSubtask((s) =>
                                 s ? { ...s, assignees: updatedAssignees } : s,
@@ -757,9 +745,11 @@ const AutoSaveTable = () => {
                           >
                             <input
                               type="checkbox"
-                              checked={newSubtask.assignees?.some(
-                                (u) => u.id === user.id,
-                              )}
+                              checked={
+                                newSubtask.assignees?.some(
+                                  (u) => u.id === user.id,
+                                ) || false
+                              }
                               readOnly
                               className="w-4 h-4"
                             />
@@ -781,8 +771,7 @@ const AutoSaveTable = () => {
                   </div>
                 </td>
 
-                {/* Subtask Status */}
-                <td className=" py-2">
+                <td className="py-2">
                   <Select
                     value={newSubtask?.status}
                     onChange={(value) =>
@@ -806,11 +795,10 @@ const AutoSaveTable = () => {
                   </Select>
                 </td>
 
-                {/* Subtask Due Date */}
                 <td className="p-3 py-2">
                   <DatePicker
                     value={
-                      newSubtask?.due_date ? dayjs(newSubtask.due_date) : null
+                      newSubtask?.dueDate ? dayjs(newSubtask.dueDate) : null
                     }
                     onChange={(date, dateString) => {
                       const normalized = Array.isArray(dateString)
@@ -829,7 +817,6 @@ const AutoSaveTable = () => {
                   />
                 </td>
 
-                {/* Subtask Priority */}
                 <td className="py-2 max-w-[120px]">
                   <Select
                     value={newSubtask?.priority}
@@ -854,7 +841,6 @@ const AutoSaveTable = () => {
                   </Select>
                 </td>
 
-                {/* Action Buttons */}
                 <td className="p-3 py-2 max-w-[10px]">
                   <div className="flex items-center justify-center gap-1">
                     <Tooltip title="Cancel (Esc)">
@@ -885,7 +871,6 @@ const AutoSaveTable = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Message notification */}
       {message && (
         <div
           className={`fixed top-4 right-4 px-4 py-2 rounded shadow-lg z-50 ${
@@ -900,9 +885,7 @@ const AutoSaveTable = () => {
         </div>
       )}
 
-      {/* Header section with Add Task button */}
       <div className="flex items-center justify-end mb-3">
-        {/* <h2 className="text-xl font-semibold text-gray-800">Task Management</h2> */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -933,7 +916,7 @@ const AutoSaveTable = () => {
                   <th className="p-2 text-left font-semibold text-gray-700">
                     Due Date
                   </th>
-                  <th className=" p-2 text-left font-semibold text-gray-700 max-w-[120px]">
+                  <th className="p-2 text-left font-semibold text-gray-700 max-w-[120px]">
                     Priority
                   </th>
                   <th className="p-2 text-left font-semibold text-gray-700 max-w-[80px]">
@@ -942,15 +925,15 @@ const AutoSaveTable = () => {
                 </tr>
               </thead>
               <tbody>
-                {loading ? (
+                {reduxLoading ? (
                   <tr>
-                    <td colSpan={5} className="text-center p-8 text-gray-500">
+                    <td colSpan={6} className="text-center p-8 text-gray-500">
                       Loading tasks...
                     </td>
                   </tr>
                 ) : tasks.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="text-center p-8 text-gray-500">
+                    <td colSpan={6} className="text-center p-8 text-gray-500">
                       No tasks available
                     </td>
                   </tr>

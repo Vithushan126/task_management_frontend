@@ -7,6 +7,7 @@ import orgMembersReducer from '@/redux/feature/organization/member-slice';
 import workspaceReducer from '@/redux/feature/workspace/workspace-slice';
 import spaceReducer from './feature/space/space-slice';
 import projectReducer from './feature/project/project-slice';
+import taskReducer from './feature/task/task-slice';
 
 // import visitorReducer from "./features/visitors/visitor-slice";
 // import departmentReducer from "./features/department/department-slice";
@@ -20,6 +21,7 @@ const rootReducer = combineReducers({
   workspace: workspaceReducer,
   space: spaceReducer,
   project: projectReducer,
+  task: taskReducer,
   //   visitor: visitorReducer,
   //   department: departmentReducer,
   //   designation: designationReducer,
@@ -39,6 +41,7 @@ const persistConfig = {
     'workspace',
     'space',
     'project',
+    'task',
   ],
 };
 

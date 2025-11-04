@@ -107,7 +107,7 @@ export const useMemberPages = (): NavItem[] => {
                     id: 'list',
                     name: 'List',
                     icon: <TableIcon />,
-                    path: `/${ws?.id}/${space?.id}/${project.id}/list`,
+                    path: `/${ws?.id}/${space?.id}/${project.id}/task`,
                   },
                   {
                     id: 'board',
@@ -183,6 +183,6 @@ export const useMemberPages = (): NavItem[] => {
     { icon: <PlugInIcon />, name: 'Settings', path: '/settings' },
     // { icon: <PlugInIcon />, name: 'Workspaces', path: '/workspaces' },
     // { icon: <PlugInIcon />, name: 'Spaces', path: '/spaces' },
-    { icon: <PlugInIcon />, name: 'Projects', path: '/projects' },
+    // { icon: <PlugInIcon />, name: 'Projects', path: '/projects' },
   ];
 };

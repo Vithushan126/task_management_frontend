@@ -122,7 +122,7 @@ const TaskForm = forwardRef(
           rows={3}
         />
 
-        <BaseSelect
+        {/* <BaseSelect
           name="projectId"
           label="Project"
           placeholder="Select a Project"
@@ -130,7 +130,7 @@ const TaskForm = forwardRef(
           //   value={selectedSpace}
           onChange={setSelectedProject}
           required
-        />
+        /> */}
 
         <div className="grid grid-cols-2 gap-4">
           <BaseSelect
