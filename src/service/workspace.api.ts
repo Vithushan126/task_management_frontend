@@ -25,7 +25,7 @@ export const updateWorkspace = async (
   id: string,
   payload: Partial<CreateWorkspaceDto>,
 ) => {
-  const { data } = await api.put(`/workspaces/${id}`, payload);
+  const { data } = await api.patch(`/workspaces/${id}`, payload);
   return data.data;
 };
 

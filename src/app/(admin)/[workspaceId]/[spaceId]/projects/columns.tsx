@@ -149,8 +149,8 @@ export const getProjectColumns = (
         <Avatar.Group size="small" max={{ count: 3 }}>
           {record.members?.slice(0, 3).map((member) => (
             <Avatar key={member.id} className="bg-gray-500">
-              {member.user.firstName.charAt(0)}
-              {member.user.lastName.charAt(0)}
+              {member?.user?.firstName.charAt(0)}
+              {member?.user?.lastName.charAt(0)}
             </Avatar>
           ))}
         </Avatar.Group>
@@ -239,7 +239,11 @@ export const getProjectColumns = (
             <Button
               type="text"
               size="small"
-              icon={<DeleteOutlined />}
+              icon={
+                <DeleteOutlined
+                  style={{ color: 'rgb(220,38,38)', fontSize: 16 }}
+                />
+              }
               className="text-red-600 hover:text-red-700"
             />
           </Tooltip>

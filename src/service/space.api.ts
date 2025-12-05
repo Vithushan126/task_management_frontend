@@ -15,9 +15,12 @@ export const createSpace = async (payload: CreateSpaceDto) => {
   return data.data;
 };
 
-export const updateSpace = async (id: string, payload: Partial<CreateSpaceDto>) => {
-  const { data } = await api.put(`/spaces/${id}`, payload);
-  return data.data;
+export const updateSpace = async (
+  id: string,
+  payload: Partial<CreateSpaceDto>,
+) => {
+  const res = await api.patch(`/spaces/${id}`, payload);
+  return res;
 };
 
 export const deleteSpace = async (id: string) => {
@@ -39,6 +42,9 @@ export const getSpaceMembers = async (id: string) => {
   return await api.get(`/spaces/${id}/members`);
 };
 
-export const inviteSpaceMembers = async (id: string, payload: { emails: string[]; role: string }) => {
+export const inviteSpaceMembers = async (
+  id: string,
+  payload: { emails: string[]; role: string },
+) => {
   return await api.post(`/spaces/${id}/invite`, payload);
 };

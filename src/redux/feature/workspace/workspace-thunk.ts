@@ -42,8 +42,6 @@ export const createWorkspace = createAsyncThunk(
   'workspace/create',
   async (payload: CreateWorkspaceDto, thunkAPI) => {
     try {
-      console.log('payload', payload);
-
       const response = await WorkspaceAPI.createWorkspace(payload);
       thunkAPI.dispatch(getAllNested());
       return response;

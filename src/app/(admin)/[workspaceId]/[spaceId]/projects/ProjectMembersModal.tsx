@@ -1,14 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Modal, Table, Button, Select, Avatar, Tag, Popconfirm, Form, message } from 'antd';
+import {
+  Modal,
+  Table,
+  Button,
+  Select,
+  Avatar,
+  Tag,
+  Popconfirm,
+  Form,
+  message,
+} from 'antd';
 import { UserAddOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@/hooks/use-redux';
-import { addProjectMember, removeProjectMember } from '@/redux/feature/project/project-thunk';
+import {
+  addProjectMember,
+  removeProjectMember,
+} from '@/redux/feature/project/project-thunk';
 import type { Project } from '@/types/project';
-import  {  ProjectRole } from '@/types/project';
+import { ProjectRole } from '@/types/project';
 import toast from 'react-hot-toast';
 import { getOrganizationMembers } from '@/redux/feature/organization/organization-thunk';
+import { log } from 'console';
 
 type ProjectMembersModalProps = {
   project: Project | null;
@@ -17,43 +31,62 @@ type ProjectMembersModalProps = {
   onMemberAdded?: () => void;
 };
 
-const ProjectMembersModal = ({ project, open, onClose, onMemberAdded }: ProjectMembersModalProps) => {
+const ProjectMembersModal = ({
+  project,
+  open,
+  onClose,
+  onMemberAdded,
+}: ProjectMembersModalProps) => {
+  console.log('project', project);
+
   const dispatch = useAppDispatch();
   const [form] = Form.useForm();
   const { organization } = useAppSelector((state) => state.auth);
+
   const { members: orgMembers } = useAppSelector((state) => state.orgMembers);
   const { loading } = useAppSelector((state) => state.project);
-  
+
   const [addingMember, setAddingMember] = useState(false);
 
   useEffect(() => {
     if (open && organization?.id) {
-      dispatch(getOrganizationMembers({ 
-        organizationId: organization.id,
-        page: 1,
-        limit: 100 
-      }));
+      dispatch(
+        getOrganizationMembers({
+          organizationId: organization.id,
+          // page: 1,
+          // limit: 100,
+        }),
+      );
     }
   }, [open, organization?.id, dispatch]);
 
-  const handleAddMember = async (values: { userId: string; role: ProjectRole }) => {
+  const handleAddMember = async (values: {
+    userId: string;
+    role: ProjectRole;
+  }) => {
     if (!project) return;
 
     try {
-      await dispatch(addProjectMember({
-        id: project.id,
-        payload: {
-          userId: values.userId,
-          role: values.role,
-        }
-      })).unwrap();
-      
+      await dispatch(
+        addProjectMember({
+          id: project.id,
+          payload: {
+            userId: values.userId,
+            role: values.role,
+          },
+        }),
+      ).unwrap();
+
       toast.success('Member added successfully!');
       form.resetFields();
       setAddingMember(false);
       onMemberAdded?.();
     } catch (error) {
-      toast.error('Failed to add member');
+      console.log(error);
+
+      const message = 'Failed to add member';
+
+      toast.error(message);
     }
   };
 
@@ -61,11 +94,13 @@ const ProjectMembersModal = ({ project, open, onClose, onMemberAdded }: ProjectM
     if (!project) return;
 
     try {
-      await dispatch(removeProjectMember({
-        projectId: project.id,
-        userId
-      })).unwrap();
-      
+      await dispatch(
+        removeProjectMember({
+          projectId: project.id,
+          userId,
+        }),
+      ).unwrap();
+
       toast.success('Member removed successfully!');
       onMemberAdded?.();
     } catch (error) {
@@ -81,7 +116,8 @@ const ProjectMembersModal = ({ project, open, onClose, onMemberAdded }: ProjectM
       render: (user: any) => (
         <div className="flex items-center gap-3">
           <Avatar className="bg-gray-500">
-            {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+            {user.firstName.charAt(0)}
+            {user.lastName.charAt(0)}
           </Avatar>
           <div>
             <div className="font-medium text-gray-800 dark:text-white">
@@ -99,7 +135,12 @@ const ProjectMembersModal = ({ project, open, onClose, onMemberAdded }: ProjectM
       dataIndex: 'role',
       key: 'role',
       render: (role: ProjectRole) => (
-        <Tag color={role === 'admin' ? 'red' : role === 'member' ? 'blue' : 'green'} className="capitalize">
+        <Tag
+          color={
+            role === 'admin' ? 'red' : role === 'member' ? 'blue' : 'green'
+          }
+          className="capitalize"
+        >
           {role}
         </Tag>
       ),
@@ -133,13 +174,18 @@ const ProjectMembersModal = ({ project, open, onClose, onMemberAdded }: ProjectM
   ];
 
   // Filter out members who are already in the project
-  const availableMembers = orgMembers.filter(orgMember => 
-    !project?.members?.some(projectMember => projectMember.userId === orgMember.userId)
+  const availableMembers = orgMembers.filter(
+    (orgMember) =>
+      !project?.members?.some(
+        (projectMember) => projectMember.userId === orgMember.user?.id,
+      ),
   );
 
-  const memberOptions = availableMembers.map(member => ({
-    label: `${member.firstName} ${member.lastName} (${member.email})`,
-    value: member.userId,
+  console.log('availableMembers', availableMembers);
+
+  const memberOptions = availableMembers.map((member) => ({
+    label: member?.user?.email,
+    value: member.user?.id,
   }));
 
   const roleOptions = [
@@ -204,9 +250,11 @@ const ProjectMembersModal = ({ project, open, onClose, onMemberAdded }: ProjectM
                   options={memberOptions}
                   showSearch
                   filterOption={(input, option) =>
-                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                    (option?.label ?? '')
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
                   }
-                  className="w-full"
+                  style={{ width: 300 }}
                 />
               </Form.Item>
               <Form.Item
@@ -225,10 +273,12 @@ const ProjectMembersModal = ({ project, open, onClose, onMemberAdded }: ProjectM
                   <Button type="primary" htmlType="submit" loading={loading}>
                     Add
                   </Button>
-                  <Button onClick={() => {
-                    setAddingMember(false);
-                    form.resetFields();
-                  }}>
+                  <Button
+                    onClick={() => {
+                      setAddingMember(false);
+                      form.resetFields();
+                    }}
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -245,7 +295,7 @@ const ProjectMembersModal = ({ project, open, onClose, onMemberAdded }: ProjectM
           pagination={false}
           size="small"
           locale={{
-            emptyText: 'No members found'
+            emptyText: 'No members found',
           }}
         />
 

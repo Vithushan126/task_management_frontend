@@ -55,6 +55,8 @@ export const acceptInvitations = async (
 };
 
 export const getOrganizationMembers = async (id: string) => {
+  console.log('id', id);
+
   return await api.get(`/organizations/${id}/members`);
 };
 

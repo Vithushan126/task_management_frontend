@@ -115,7 +115,7 @@ export const getOrganizationMembers = createAsyncThunk(
   'organization/members',
   async (id: any, thunkAPI) => {
     try {
-      const data = await OrgAPI.getOrganizationMembers(id);
+      const data = await OrgAPI.getOrganizationMembers(id?.organizationId);
       return data.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(

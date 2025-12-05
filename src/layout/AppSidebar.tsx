@@ -212,10 +212,12 @@ const AppSidebar: React.FC = () => {
 
       // Auto-expand workspace if current path matches
       if (nav.isWorkspace && nav.projects) {
+        console.log(nav.isWorkspace);
+
         nav.projects.forEach((project) => {
           if (pathname.includes(project.slug)) {
             setExpandedWorkspaces((prev) => ({ ...prev, [nav.name]: true }));
-            setExpandedProjects((prev) => ({ ...prev, [project.id]: true }));
+            // setExpandedProjects((prev) => ({ ...prev, [project.id]: true }));
           }
         });
       }
@@ -580,7 +582,7 @@ const AppSidebar: React.FC = () => {
               </>
             )}
           </div>
-          <ul className="flex flex-col gap-1">
+          <ul className="flex flex-col gap-1 cursor-pointer">
             {workspaceItems.map((nav, index) =>
               renderWorkspaceItem(nav, index),
             )}

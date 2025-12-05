@@ -31,8 +31,8 @@ export const getWorkspaceColumns = (
           </span>
           {record.description && (
             <span className="text-xs text-gray-500 dark:text-gray-400">
-              {record.description.length > 30 
-                ? `${record.description.substring(0, 30)}...` 
+              {record.description.length > 30
+                ? `${record.description.substring(0, 30)}...`
                 : record.description}
             </span>
           )}
@@ -48,7 +48,8 @@ export const getWorkspaceColumns = (
       <div className="flex items-center gap-2">
         <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
           <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-            {owner?.firstName?.charAt(0)}{owner?.lastName?.charAt(0)}
+            {owner?.firstName?.charAt(0)}
+            {owner?.lastName?.charAt(0)}
           </span>
         </div>
         <div>
@@ -69,13 +70,17 @@ export const getWorkspaceColumns = (
     render: (visibility: string) => {
       const getVisibilityColor = (vis: string) => {
         switch (vis) {
-          case 'public': return 'green';
-          case 'internal': return 'blue';
-          case 'private': return 'orange';
-          default: return 'default';
+          case 'public':
+            return 'green';
+          case 'internal':
+            return 'blue';
+          case 'private':
+            return 'orange';
+          default:
+            return 'default';
         }
       };
-      
+
       return (
         <Tag color={getVisibilityColor(visibility)} className="capitalize">
           {visibility}
@@ -93,16 +98,16 @@ export const getWorkspaceColumns = (
       </span>
     ),
   },
-  {
-    title: 'Projects',
-    dataIndex: 'projectCount',
-    width: 100,
-    render: (count) => (
-      <span className="text-sm text-gray-600 dark:text-gray-300">
-        {count || 0}
-      </span>
-    ),
-  },
+  // {
+  //   title: 'Projects',
+  //   dataIndex: 'projectCount',
+  //   width: 100,
+  //   render: (count) => (
+  //     <span className="text-sm text-gray-600 dark:text-gray-300">
+  //       {count || 0}
+  //     </span>
+  //   ),
+  // },
   {
     title: 'Status',
     dataIndex: 'isActive',
@@ -155,7 +160,11 @@ export const getWorkspaceColumns = (
           <Button
             type="text"
             size="small"
-            icon={<DeleteOutlined />}
+            icon={
+              <DeleteOutlined
+                style={{ color: 'rgb(220,38,38)', fontSize: 16 }}
+              />
+            }
             className="text-red-600 hover:text-red-700"
             title="Delete Workspace"
           />
