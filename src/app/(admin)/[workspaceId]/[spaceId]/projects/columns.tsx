@@ -235,7 +235,15 @@ export const getProjectColumns = (
           okText="Yes"
           cancelText="No"
         >
-          <Tooltip title="Delete Project">
+          <Tooltip
+            title="Delete Project"
+            styles={{
+              body: {
+                backgroundColor: 'red',
+                color: 'white',
+              },
+            }}
+          >
             <Button
               type="text"
               size="small"

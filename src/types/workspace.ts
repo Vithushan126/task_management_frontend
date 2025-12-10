@@ -1,3 +1,5 @@
+import { ProjectRole } from './project';
+
 export type Workspace = {
   id: string;
   name: string;
@@ -9,6 +11,7 @@ export type Workspace = {
   createdAt: string;
   updatedAt: string;
   memberCount?: number;
+  members?: any[];
   projectCount?: number;
   owner?: {
     id: string;
@@ -36,4 +39,8 @@ export type CreateWorkspaceDto = {
   visibility: 'private' | 'internal' | 'public';
   organizationId: string;
   userId?: string;
+};
+export type AddWorkspaceMemberDto = {
+  email: string;
+  role?: ProjectRole;
 };

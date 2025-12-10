@@ -1,5 +1,5 @@
 import api from './axios';
-import { CreateWorkspaceDto } from '@/types/workspace';
+import { AddWorkspaceMemberDto, CreateWorkspaceDto } from '@/types/workspace';
 
 export const createWorkspace = async (payload: CreateWorkspaceDto) => {
   const { data } = await api.post(
@@ -40,7 +40,14 @@ export const getWorkspaceMembers = async (id: string) => {
 
 export const inviteWorkspaceMembers = async (
   id: string,
-  payload: { emails: string[]; role: string },
+  payload: AddWorkspaceMemberDto,
 ) => {
   return await api.post(`/workspaces/${id}/invite`, payload);
+};
+
+export const removeWorkspaceMember = async (
+  workspaceId: string,
+  memberId: string,
+) => {
+  return await api.delete(`/workspaces/${workspaceId}/members/${memberId}`);
 };

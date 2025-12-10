@@ -18,32 +18,40 @@ import {
   addProjectMember,
   removeProjectMember,
 } from '@/redux/feature/project/project-thunk';
-import type { Project } from '@/types/project';
 import { ProjectRole } from '@/types/project';
 import toast from 'react-hot-toast';
 import { getOrganizationMembers } from '@/redux/feature/organization/organization-thunk';
+import { Space } from '@/types/space';
 
-type ProjectMembersModalProps = {
-  project: Project | null;
+type SpaceMembersModalProps = {
+  space: Space | null;
   open: boolean;
   onClose: () => void;
   onMemberAdded?: () => void;
 };
 
-const ProjectMembersModal = ({
-  project,
+const SpaceMembersModal = ({
+  space,
   open,
   onClose,
   onMemberAdded,
-}: ProjectMembersModalProps) => {
+}: SpaceMembersModalProps) => {
+  console.log(space?.members);
+
   const dispatch = useAppDispatch();
   const [form] = Form.useForm();
   const { organization } = useAppSelector((state) => state.auth);
 
   const { members: orgMembers } = useAppSelector((state) => state.orgMembers);
+  const { workspaces } = useAppSelector((state) => state.workspace);
   const { loading } = useAppSelector((state) => state.project);
 
   const [addingMember, setAddingMember] = useState(false);
+
+  const workspaceMembers =
+    workspaces.find((ws) => ws.id === space?.workspace?.id)?.members || [];
+
+  console.log(workspaceMembers);
 
   useEffect(() => {
     if (open && organization?.id) {
@@ -61,12 +69,12 @@ const ProjectMembersModal = ({
     userId: string;
     role: ProjectRole;
   }) => {
-    if (!project) return;
+    if (!space) return;
 
     try {
       await dispatch(
         addProjectMember({
-          id: project.id,
+          id: space.id,
           payload: {
             userId: values.userId,
             role: values.role,
@@ -88,12 +96,12 @@ const ProjectMembersModal = ({
   };
 
   const handleRemoveMember = async (userId: string) => {
-    if (!project) return;
+    if (!space) return;
 
     try {
       await dispatch(
         removeProjectMember({
-          projectId: project.id,
+          projectId: space.id,
           userId,
         }),
       ).unwrap();
@@ -151,7 +159,7 @@ const ProjectMembersModal = ({
     {
       title: 'Actions',
       key: 'actions',
-      render: (_, record: any) => (
+      render: (_: any, record: any) => (
         <Popconfirm
           title="Remove Member"
           description="Are you sure you want to remove this member from the project?"
@@ -171,18 +179,18 @@ const ProjectMembersModal = ({
   ];
 
   // Filter out members who are already in the project
-  const availableMembers = orgMembers.filter(
+  const availableMembers = workspaceMembers.filter(
     (orgMember) =>
-      !project?.members?.some(
-        (projectMember) => projectMember.userId === orgMember.user?.id,
+      !space?.members?.some(
+        (spaceMember) => spaceMember.user?.id === orgMember.user?.id,
       ),
   );
 
   console.log('availableMembers', availableMembers);
 
   const memberOptions = availableMembers.map((member) => ({
-    label: member?.user?.email,
-    value: member.user?.id,
+    label: member?.email,
+    value: member?.id,
   }));
 
   const roleOptions = [
@@ -197,14 +205,14 @@ const ProjectMembersModal = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm">
-              {project?.name.charAt(0).toUpperCase()}
+              {space?.name.charAt(0).toUpperCase()}
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                {project?.name} - Members
+                {space?.name} - Members
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Manage project team members
+                Manage space team members
               </p>
             </div>
           </div>
@@ -287,7 +295,7 @@ const ProjectMembersModal = ({
         {/* Members Table */}
         <Table
           columns={columns}
-          dataSource={project?.members || []}
+          dataSource={space?.members || []}
           rowKey="id"
           pagination={false}
           size="small"
@@ -298,7 +306,7 @@ const ProjectMembersModal = ({
 
         {availableMembers.length === 0 && !addingMember && (
           <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-            All organization members are already part of this project
+            All workspace members are already part of this space
           </div>
         )}
       </div>
@@ -306,4 +314,4 @@ const ProjectMembersModal = ({
   );
 };
 
-export default ProjectMembersModal;
+export default SpaceMembersModal;

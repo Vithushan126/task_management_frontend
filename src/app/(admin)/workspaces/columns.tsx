@@ -1,6 +1,11 @@
 import { ColumnsType } from 'antd/es/table';
-import { Button, Popconfirm, Tag } from 'antd';
-import { EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { Button, Popconfirm, Tag, Tooltip } from 'antd';
+import {
+  EditOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  UserAddOutlined,
+} from '@ant-design/icons';
 import Image from 'next/image';
 import useColumnSearch from '@/components/common/table/useColumnSearch';
 import type { Workspace } from '@/types/workspace';
@@ -11,6 +16,7 @@ export const getWorkspaceColumns = (
   >['getColumnSearchProps'],
   handleEdit: (workspace: Workspace) => void,
   handleDelete: (id: string) => void,
+  handleManageMembers: (workspace: Workspace) => void,
 ): ColumnsType<Workspace> => [
   {
     title: 'Workspace Name',
@@ -135,21 +141,34 @@ export const getWorkspaceColumns = (
     width: 120,
     render: (_, record) => (
       <div className="flex items-center gap-2">
-        <Button
-          type="text"
-          size="small"
-          icon={<EyeOutlined />}
-          className="text-blue-600 hover:text-blue-700"
-          title="View Details"
-        />
-        <Button
-          type="text"
-          size="small"
-          icon={<EditOutlined />}
-          onClick={() => handleEdit(record)}
-          className="text-green-600 hover:text-green-700"
-          title="Edit Workspace"
-        />
+        <Tooltip title="View Details">
+          <Button
+            type="text"
+            size="small"
+            icon={<EyeOutlined />}
+            className="text-blue-600 hover:text-blue-700"
+            title="View Details"
+          />
+        </Tooltip>
+        <Tooltip title="Edit Workspace">
+          <Button
+            type="text"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+            className="text-green-600 hover:text-green-700"
+            title="Edit Workspace"
+          />
+        </Tooltip>
+        <Tooltip title="Manage Members">
+          <Button
+            type="text"
+            size="small"
+            icon={<UserAddOutlined />}
+            onClick={() => handleManageMembers(record)}
+            className="text-purple-600 hover:text-purple-700"
+          />
+        </Tooltip>
         <Popconfirm
           title="Delete Workspace"
           description="Are you sure you want to delete this workspace?"
@@ -157,17 +176,19 @@ export const getWorkspaceColumns = (
           okText="Yes"
           cancelText="No"
         >
-          <Button
-            type="text"
-            size="small"
-            icon={
-              <DeleteOutlined
-                style={{ color: 'rgb(220,38,38)', fontSize: 16 }}
-              />
-            }
-            className="text-red-600 hover:text-red-700"
-            title="Delete Workspace"
-          />
+          <Tooltip title="Delete Workspace">
+            <Button
+              type="text"
+              size="small"
+              icon={
+                <DeleteOutlined
+                  style={{ color: 'rgb(220,38,38)', fontSize: 16 }}
+                />
+              }
+              className="text-red-600 hover:text-red-700"
+              title="Delete Workspace"
+            />
+          </Tooltip>
         </Popconfirm>
       </div>
     ),

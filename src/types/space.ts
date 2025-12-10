@@ -32,6 +32,28 @@ export type SpaceSettings = {
   };
 };
 
+export enum SpaceRole {
+  ADMIN = 'admin',
+  MEMBER = 'member',
+  VIEWER = 'viewer',
+}
+
+export type SpaceMember = {
+  id: string;
+  projectId: string;
+  userId: string;
+  role: SpaceRole;
+  permissions?: string[];
+  addedBy: string;
+  addedAt: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+};
+
 export type Space = {
   id: string;
   name: string;
@@ -48,6 +70,7 @@ export type Space = {
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
+  members: SpaceMember[];
   workspace: {
     id: string;
     name: string;

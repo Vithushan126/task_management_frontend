@@ -21,6 +21,7 @@ import type { Space } from '@/types/space';
 import { getSpaceColumns } from './columns';
 import SpaceForm from './SpaceForm';
 import { useParams } from 'next/navigation';
+import SpaceMembersModal from './SpaceMembersModal';
 
 export default function Spaces() {
   const params = useParams();
@@ -34,6 +35,9 @@ export default function Spaces() {
   const [editingRecord, setEditingRecord] = useState<Space | null>(null);
   const [selectedWorkspace, setSelectedWorkspace] = useState<any>(workspaceId);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
+  const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
+  const [membersModalOpen, setMembersModalOpen] = useState(false);
+
   const { isOpen, openModal, closeModal } = useModal();
   const { getColumnSearchProps } = useColumnSearch<Space>();
 
@@ -118,6 +122,11 @@ export default function Spaces() {
     }
   };
 
+  const handleManageMembers = (space: Space) => {
+    setSelectedSpace(space);
+    setMembersModalOpen(true);
+  };
+
   const columns = useMemo(
     () =>
       getSpaceColumns(
@@ -125,6 +134,7 @@ export default function Spaces() {
         handleEdit,
         handleDelete,
         handleArchive,
+        handleManageMembers,
       ),
     [getColumnSearchProps],
   );
@@ -232,6 +242,26 @@ export default function Spaces() {
           </p>
         </div>
       )}
+
+      <SpaceMembersModal
+        space={selectedSpace}
+        open={membersModalOpen}
+        onClose={() => {
+          setMembersModalOpen(false);
+          setSelectedSpace(null);
+        }}
+        onMemberAdded={() => {
+          if (selectedWorkspace) {
+            dispatch(
+              getAllSpaces({
+                workspaceId: selectedWorkspace,
+                page: pagination.current,
+                limit: pagination.pageSize,
+              }),
+            );
+          }
+        }}
+      />
     </div>
   );
 }

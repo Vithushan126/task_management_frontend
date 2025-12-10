@@ -1,6 +1,12 @@
 import { ColumnsType } from 'antd/es/table';
 import { Button, Popconfirm, Tag, Tooltip } from 'antd';
-import { EditOutlined, DeleteOutlined, EyeOutlined, InboxOutlined,  } from '@ant-design/icons';
+import {
+  EditOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  InboxOutlined,
+  UserAddOutlined,
+} from '@ant-design/icons';
 import useColumnSearch from '@/components/common/table/useColumnSearch';
 import type { Space } from '@/types/space';
 
@@ -11,6 +17,7 @@ export const getSpaceColumns = (
   handleEdit: (space: Space) => void,
   handleDelete: (id: string) => void,
   handleArchive: (id: string) => void,
+  handleManageMembers: (space: Space) => void,
 ): ColumnsType<Space> => [
   {
     title: 'Space',
@@ -20,7 +27,7 @@ export const getSpaceColumns = (
     ...getColumnSearchProps('name'),
     render: (_, record) => (
       <div className="flex items-center gap-3">
-        <div 
+        <div
           className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-lg"
           style={{ backgroundColor: record.color }}
         >
@@ -32,8 +39,8 @@ export const getSpaceColumns = (
           </div>
           {record.description && (
             <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {record.description.length > 40 
-                ? `${record.description.substring(0, 40)}...` 
+              {record.description.length > 40
+                ? `${record.description.substring(0, 40)}...`
                 : record.description}
             </div>
           )}
@@ -52,7 +59,8 @@ export const getSpaceColumns = (
       <div className="flex items-center gap-2">
         <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
           <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-            {owner?.firstName?.charAt(0)}{owner?.lastName?.charAt(0)}
+            {owner?.firstName?.charAt(0)}
+            {owner?.lastName?.charAt(0)}
           </span>
         </div>
         <div>
@@ -73,13 +81,17 @@ export const getSpaceColumns = (
     render: (visibility: string) => {
       const getVisibilityColor = (vis: string) => {
         switch (vis) {
-          case 'public': return 'green';
-          case 'internal': return 'blue';
-          case 'private': return 'orange';
-          default: return 'default';
+          case 'public':
+            return 'green';
+          case 'internal':
+            return 'blue';
+          case 'private':
+            return 'orange';
+          default:
+            return 'default';
         }
       };
-      
+
       return (
         <Tag color={getVisibilityColor(visibility)} className="capitalize">
           {visibility}
@@ -93,9 +105,7 @@ export const getSpaceColumns = (
     width: 100,
     render: (status: string, record) => (
       <div className="flex flex-col gap-1">
-        <Tag color={status === 'active' ? 'green' : 'red'}>
-          {status}
-        </Tag>
+        <Tag color={status === 'active' ? 'green' : 'red'}>{status}</Tag>
         {record.isArchived && (
           <Tag color="orange" className="text-xs">
             Archived
@@ -168,13 +178,22 @@ export const getSpaceColumns = (
             className="text-green-600 hover:text-green-700"
           />
         </Tooltip>
-        <Tooltip title={record.isArchived ? "Unarchive" : "Archive"}>
+        <Tooltip title={record.isArchived ? 'Unarchive' : 'Archive'}>
           <Button
             type="text"
             size="small"
             icon={<InboxOutlined />}
             onClick={() => handleArchive(record.id)}
             className="text-orange-600 hover:text-orange-700"
+          />
+        </Tooltip>
+        <Tooltip title="Manage Members">
+          <Button
+            type="text"
+            size="small"
+            icon={<UserAddOutlined />}
+            onClick={() => handleManageMembers(record)}
+            className="text-purple-600 hover:text-purple-700"
           />
         </Tooltip>
         <Popconfirm
@@ -184,7 +203,15 @@ export const getSpaceColumns = (
           okText="Yes"
           cancelText="No"
         >
-          <Tooltip title="Delete Space">
+          <Tooltip
+            title="Delete Space"
+            styles={{
+              body: {
+                backgroundColor: 'red',
+                color: 'white',
+              },
+            }}
+          >
             <Button
               type="text"
               size="small"

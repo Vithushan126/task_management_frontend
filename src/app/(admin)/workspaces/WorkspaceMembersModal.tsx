@@ -18,24 +18,28 @@ import {
   addProjectMember,
   removeProjectMember,
 } from '@/redux/feature/project/project-thunk';
-import type { Project } from '@/types/project';
 import { ProjectRole } from '@/types/project';
 import toast from 'react-hot-toast';
 import { getOrganizationMembers } from '@/redux/feature/organization/organization-thunk';
+import { Workspace } from '@/types/workspace';
+import {
+  addWorkspaceMember,
+  removeWorkspaceMember,
+} from '@/redux/feature/workspace/workspace-thunk';
 
-type ProjectMembersModalProps = {
-  project: Project | null;
+type WorkspaceMembersModalProps = {
+  workspace: Workspace | null;
   open: boolean;
   onClose: () => void;
   onMemberAdded?: () => void;
 };
 
-const ProjectMembersModal = ({
-  project,
+const WorkspaceMembersModal = ({
+  workspace,
   open,
   onClose,
   onMemberAdded,
-}: ProjectMembersModalProps) => {
+}: WorkspaceMembersModalProps) => {
   const dispatch = useAppDispatch();
   const [form] = Form.useForm();
   const { organization } = useAppSelector((state) => state.auth);
@@ -58,17 +62,17 @@ const ProjectMembersModal = ({
   }, [open, organization?.id, dispatch]);
 
   const handleAddMember = async (values: {
-    userId: string;
+    email: string;
     role: ProjectRole;
   }) => {
-    if (!project) return;
+    if (!workspace) return;
 
     try {
       await dispatch(
-        addProjectMember({
-          id: project.id,
+        addWorkspaceMember({
+          id: workspace.id,
           payload: {
-            userId: values.userId,
+            email: values.email,
             role: values.role,
           },
         }),
@@ -79,22 +83,20 @@ const ProjectMembersModal = ({
       setAddingMember(false);
       onMemberAdded?.();
     } catch (error) {
-      console.log(error);
-
       const message = 'Failed to add member';
 
       toast.error(message);
     }
   };
 
-  const handleRemoveMember = async (userId: string) => {
-    if (!project) return;
+  const handleRemoveMember = async (record: any) => {
+    if (!workspace) return;
 
     try {
       await dispatch(
-        removeProjectMember({
-          projectId: project.id,
-          userId,
+        removeWorkspaceMember({
+          workspaceId: workspace.id,
+          memberId: record.id,
         }),
       ).unwrap();
 
@@ -108,20 +110,20 @@ const ProjectMembersModal = ({
   const columns = [
     {
       title: 'Member',
-      dataIndex: 'user',
-      key: 'user',
-      render: (user: any) => (
+      //   dataIndex: 'user',
+      key: 'member',
+      render: (member: any) => (
         <div className="flex items-center gap-3">
           <Avatar className="bg-gray-500">
-            {user.firstName.charAt(0)}
-            {user.lastName.charAt(0)}
+            {member.firstName?.charAt(0)}
+            {member.lastName?.charAt(0)}
           </Avatar>
           <div>
             <div className="font-medium text-gray-800 dark:text-white">
-              {`${user.firstName} ${user.lastName}`}
+              {member.firstName} {member.lastName}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              {user.email}
+              {member.email}
             </div>
           </div>
         </div>
@@ -151,11 +153,11 @@ const ProjectMembersModal = ({
     {
       title: 'Actions',
       key: 'actions',
-      render: (_, record: any) => (
+      render: (_: any, record: any) => (
         <Popconfirm
           title="Remove Member"
-          description="Are you sure you want to remove this member from the project?"
-          onConfirm={() => handleRemoveMember(record.userId)}
+          description="Are you sure you want to remove this member from the workspace?"
+          onConfirm={() => handleRemoveMember(record)}
           okText="Yes"
           cancelText="No"
         >
@@ -173,16 +175,14 @@ const ProjectMembersModal = ({
   // Filter out members who are already in the project
   const availableMembers = orgMembers.filter(
     (orgMember) =>
-      !project?.members?.some(
+      !workspace?.members?.some(
         (projectMember) => projectMember.userId === orgMember.user?.id,
       ),
   );
 
-  console.log('availableMembers', availableMembers);
-
   const memberOptions = availableMembers.map((member) => ({
     label: member?.user?.email,
-    value: member.user?.id,
+    value: member?.user?.email,
   }));
 
   const roleOptions = [
@@ -197,14 +197,14 @@ const ProjectMembersModal = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm">
-              {project?.name.charAt(0).toUpperCase()}
+              {workspace?.name.charAt(0).toUpperCase()}
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                {project?.name} - Members
+                {workspace?.name} - Members
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Manage project team members
+                Manage workspace team members
               </p>
             </div>
           </div>
@@ -222,7 +222,7 @@ const ProjectMembersModal = ({
       onCancel={onClose}
       footer={null}
       width={800}
-      className="project-members-modal"
+      className="workspace-members-modal"
     >
       <div className="space-y-4">
         {/* Add Member Form */}
@@ -238,7 +238,7 @@ const ProjectMembersModal = ({
               className="w-full"
             >
               <Form.Item
-                name="userId"
+                name="email"
                 rules={[{ required: true, message: 'Please select a member' }]}
                 className="flex-1"
               >
@@ -287,7 +287,7 @@ const ProjectMembersModal = ({
         {/* Members Table */}
         <Table
           columns={columns}
-          dataSource={project?.members || []}
+          dataSource={workspace?.members || []}
           rowKey="id"
           pagination={false}
           size="small"
@@ -298,7 +298,7 @@ const ProjectMembersModal = ({
 
         {availableMembers.length === 0 && !addingMember && (
           <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-            All organization members are already part of this project
+            All organization members are already part of this workspace
           </div>
         )}
       </div>
@@ -306,4 +306,4 @@ const ProjectMembersModal = ({
   );
 };
 
-export default ProjectMembersModal;
+export default WorkspaceMembersModal;

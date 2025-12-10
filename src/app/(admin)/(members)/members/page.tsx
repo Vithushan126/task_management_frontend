@@ -21,6 +21,8 @@ export default function Members() {
   const dispatch = useAppDispatch();
   const formRef = useRef<any>(null);
   const { organization } = useAppSelector((state) => state.auth);
+  console.log('organization', organization);
+
   const orgId = organization?.id;
   const { members, loading } = useAppSelector((state) => state.orgMembers);
   const [selectedFilter, setSelectedFilter] = useState<string>('active');
@@ -55,7 +57,13 @@ export default function Members() {
   };
 
   const columns = useMemo(
-    () => getEmployeeColumns(getColumnSearchProps, handleEdit, handleDelete, selectedFilter),
+    () =>
+      getEmployeeColumns(
+        getColumnSearchProps,
+        handleEdit,
+        handleDelete,
+        selectedFilter,
+      ),
     [getColumnSearchProps, selectedFilter],
   );
 
@@ -102,7 +110,7 @@ export default function Members() {
   const handleRadioChange = (value: string) => {
     setSelectedFilter(value);
     setPagination((prev) => ({ ...prev, current: 1 }));
-    
+
     // Call different thunk based on selected filter
     if (value === 'pending') {
       dispatch(getOrganizationInvitations(orgId));
@@ -112,6 +120,8 @@ export default function Members() {
   };
 
   useEffect(() => {
+    console.log('orgId', orgId);
+
     dispatch(getOrganizationMembers(orgId));
   }, [dispatch, orgId]);
 

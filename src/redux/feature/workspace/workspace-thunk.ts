@@ -1,6 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import * as WorkspaceAPI from '@/service/workspace.api';
-import { CreateWorkspaceDto, Workspace } from '@/types/workspace';
+import {
+  AddWorkspaceMemberDto,
+  CreateWorkspaceDto,
+  Workspace,
+} from '@/types/workspace';
 
 export const getAllWorkspaces = createAsyncThunk<
   any,
@@ -77,6 +81,38 @@ export const deleteWorkspace = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error instanceof Error ? error.message : 'Failed to delete workspace',
+      );
+    }
+  },
+);
+
+export const addWorkspaceMember = createAsyncThunk(
+  'workspace/addMember',
+  async (
+    { id, payload }: { id: string; payload: AddWorkspaceMemberDto },
+    thunkAPI,
+  ) => {
+    try {
+      return await WorkspaceAPI.inviteWorkspaceMembers(id, payload);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to add member',
+      );
+    }
+  },
+);
+
+export const removeWorkspaceMember = createAsyncThunk(
+  'workspace/removeMember',
+  async (
+    { workspaceId, memberId }: { workspaceId: string; memberId: string },
+    thunkAPI,
+  ) => {
+    try {
+      return await WorkspaceAPI.removeWorkspaceMember(workspaceId, memberId);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to remove member',
       );
     }
   },

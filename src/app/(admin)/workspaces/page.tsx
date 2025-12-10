@@ -16,6 +16,8 @@ import {
 import type { Workspace } from '@/types/workspace';
 import { getWorkspaceColumns } from './columns';
 import WorkspaceForm from './WorkspaceForm';
+import ProjectMembersModal from '../[workspaceId]/[spaceId]/projects/ProjectMembersModal';
+import WorkspaceMembersModal from './WorkspaceMembersModal';
 
 export default function Workspaces() {
   const dispatch = useAppDispatch();
@@ -32,6 +34,11 @@ export default function Workspaces() {
     order?: 'ascend' | 'descend';
   }>({});
   const { isOpen, openModal, closeModal } = useModal();
+  const [membersModalOpen, setMembersModalOpen] = useState(false);
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(
+    null,
+  );
+
   const { getColumnSearchProps } = useColumnSearch<Workspace>();
 
   const handleEdit = (record: Workspace) => {
@@ -55,8 +62,19 @@ export default function Workspaces() {
     }
   };
 
+  const handleManageMembers = (workspace: Workspace) => {
+    setSelectedWorkspace(workspace);
+    setMembersModalOpen(true);
+  };
+
   const columns = useMemo(
-    () => getWorkspaceColumns(getColumnSearchProps, handleEdit, handleDelete),
+    () =>
+      getWorkspaceColumns(
+        getColumnSearchProps,
+        handleEdit,
+        handleDelete,
+        handleManageMembers,
+      ),
     [getColumnSearchProps],
   );
 
@@ -153,6 +171,26 @@ export default function Workspaces() {
           total,
         }}
         onChange={handleTableChange}
+      />
+
+      <WorkspaceMembersModal
+        workspace={selectedWorkspace}
+        open={membersModalOpen}
+        onClose={() => {
+          setMembersModalOpen(false);
+          setSelectedWorkspace(null);
+        }}
+        onMemberAdded={() => {
+          if (selectedWorkspace) {
+            dispatch(
+              getAllWorkspaces({
+                organizationId: organization?.id,
+                page: pagination.current,
+                limit: pagination.pageSize,
+              }),
+            );
+          }
+        }}
       />
     </div>
   );
